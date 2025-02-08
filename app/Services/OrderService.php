@@ -73,7 +73,7 @@ class OrderService
      */
     private function generateOrderNumber(): string
     {
-        return 'ORD-' . strtoupper(uniqid());
+        return 'ORD-' . now()->format('Ymd') . strtoupper(bin2hex(random_bytes(4)));
     }
 
     /**

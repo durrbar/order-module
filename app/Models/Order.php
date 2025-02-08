@@ -29,26 +29,27 @@ class Order extends Model
     // Relationships
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(config('order.customer.model'));
+        return $this->belongsTo(config('order.customer.model'), 'customer_id');
     }
-    public function invoice(): BelongsTo
+
+    public function invoice(): HasOne
     {
-        return $this->belongsTo(config('order.invoice.model'), 'invoice_id');
+        return $this->hasOne(config('order.invoice.model'), 'order_id', 'id');
     }
 
     public function payment(): HasOne
     {
-        return $this->hasOne(config('order.payment.model'), 'order_id');
+        return $this->hasOne(config('order.payment.model'), 'order_id', 'id');
     }
 
     public function delivery(): HasOne
     {
-        return $this->hasOne(config('order.delivery.model'), 'order_id');
+        return $this->hasOne(config('order.delivery.model'), 'order_id', 'id');
     }
 
     public function items(): HasMany
     {
-        return $this->hasMany(OrderItem::class); // Assuming an OrderItem model exists
+        return $this->hasMany(OrderItem::class, 'order_id', 'id');
     }
 
     public function history(): HasOne

@@ -1,0 +1,13 @@
+I'm using laravel 11, with nwidart/laravel-modules package for api module building
+
+Delivery module for handle delivery functionality, Invoice module for invoice management, Payment module for payment solution,
+Order module only concern for robust order solution
+
+
+There can be multiple type of order item like e-commerce product, travel tour, e-learning coarse etc.
+Okey let's discuss about order, how many things can be in a order module
+order, order items, order return, order refund etc. for complete e-commerce solution
+
+User may want to return an order, that would be refund by payment module, physical order return should be tracked, after
+return and verification of that successful it will return, all type of robust functionality that exist need to be implement
+

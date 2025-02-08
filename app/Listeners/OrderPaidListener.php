@@ -14,6 +14,7 @@ class OrderPaidListener
     public function __construct(InvoiceService $invoiceService, DeliveryService $deliveryService)
     {
         $this->invoiceService = $invoiceService;
+        $this->deliveryService = $deliveryService;
     }
 
     public function handle(OrderPaidEvent $event)

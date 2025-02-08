@@ -77,15 +77,6 @@ class OrderService
     public function updateOrderStatus(Order $order, string $status): void
     {
         $order->update(['status' => $status]);
-
-        // If the order is marked as paid, trigger payment and delivery logic
-        if ($status === 'paid') {
-            // Sync the invoice status
-            $this->invoiceService->updateInvoiceStatus($order->invoice, 'paid');
-
-            // Schedule delivery
-            $this->deliveryService->scheduleDelivery($order);
-        }
     }
 
     /**

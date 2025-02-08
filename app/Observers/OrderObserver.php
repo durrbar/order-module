@@ -3,6 +3,7 @@
 namespace Modules\Order\Observers;
 
 use Modules\Order\Events\OrderCreatedEvent;
+use Modules\Order\Events\OrderPaidEvent;
 use Modules\Order\Models\Order;
 
 class OrderObserver
@@ -21,7 +22,10 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
-        //
+        // Check if the order status has changed to 'paid'
+        if ($order->isDirty('status') && $order->status === 'paid') {
+            event(new OrderPaidEvent($order));
+        }
     }
 
     /**

@@ -38,12 +38,12 @@ class Order extends Model
 
     public function payment(): HasOne
     {
-        return $this->hasOne(config('order.payment.model'), 'payment_id');
+        return $this->hasOne(config('order.payment.model'), 'order_id');
     }
 
     public function delivery(): HasOne
     {
-        return $this->hasOne(config('order.delivery.model'), 'delivery_id');
+        return $this->hasOne(config('order.delivery.model'), 'order_id');
     }
 
     public function items(): HasMany

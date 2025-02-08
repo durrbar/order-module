@@ -32,5 +32,10 @@ class OrderCreatedListener
 
         // Create a Payment record for the Order
         $this->paymentService->createPayment($order);
+
+        // If the order was created via a web request, set a flag
+        if (!request()->isJson() && !request()->wantsJson()) {
+            app()->instance('web_created_order_' . $order->id, true);
+        }
     }
 }

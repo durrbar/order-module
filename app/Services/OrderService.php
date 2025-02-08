@@ -48,15 +48,6 @@ class OrderService
                     // Add other necessary fields
                 ]);
 
-                // Create the initial order history
-                $this->orderHistoryService->createInitialHistory($order);
-
-                // Create the associated invoice
-                $invoice = $this->invoiceService->createInvoice($order);
-
-                // Create a payment (mark as pending initially)
-                $this->paymentService->createPayment($order, 'pending');
-
                 return $order;
             });
 

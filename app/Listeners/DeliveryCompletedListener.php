@@ -4,17 +4,20 @@ namespace Modules\Order\Listeners;
 
 use Modules\Delivery\Events\DeliveryCompletedEvent;
 use Modules\Order\Services\OrderHistoryService;
+use Modules\Order\Services\OrderService;
 
 class DeliveryCompletedListener
 {
+    protected OrderService $orderService;
     protected OrderHistoryService $orderHistoryService;
 
     /**
      * Create the event listener.
      */
-    public function __construct(OrderHistoryService $orderHistoryService)
+    public function __construct(OrderService $orderService, OrderHistoryService $orderHistoryService)
     {
         $this->orderHistoryService = $orderHistoryService;
+        $this->orderService = $orderService;
     }
 
     /**
@@ -25,8 +28,10 @@ class DeliveryCompletedListener
      */
     public function handle(DeliveryCompletedEvent $event): void
     {
-        $this->orderHistoryService->addTimelineEvent($event->order, 'Order Delivered');
-        $this->orderHistoryService->updateTimestamp($event->order, 'delivery_time');
-        $this->orderHistoryService->updateTimestamp($event->order, 'completion_time');
+        $this->orderHistoryService->addTimelineEvent($event->delivery->order, 'Order Delivered');
+        $this->orderHistoryService->updateTimestamp($event->delivery->order, 'delivery_time');
+
+        // Update the associated order status to "completed"
+        $this->orderService->markOrderCompleted($event->delivery->order);
     }
 }

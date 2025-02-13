@@ -56,4 +56,44 @@ class Order extends Model
     {
         return $this->hasOne(OrderHistory::class, 'order_id', 'id');
     }
+
+    /**
+     * Get all physical items in the order.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getPhysicalItems()
+    {
+        return $this->items()->where('type', 'physical')->get();
+    }
+
+    /**
+     * Get all digital items in the order.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getDigitalItems()
+    {
+        return $this->items()->where('type', 'digital')->get();
+    }
+
+    /**
+     * Get all service items in the order.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getServiceItems()
+    {
+        return $this->items()->where('type', 'service')->get();
+    }
+
+    /**
+     * Check if the order contains any physical items.
+     *
+     * @return bool
+     */
+    public function hasPhysicalItems(): bool
+    {
+        return $this->items()->where('type', 'physical')->exists();
+    }
 }

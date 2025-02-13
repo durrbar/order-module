@@ -18,7 +18,10 @@ class OrderHistoryService
         return $order->history()->create([
             'order_time' => now(),
             'timeline' => [
-                ['title' => 'Order Created', 'time' => now()],
+                [
+                    'title' => 'Order has been created',
+                    'time' => now()
+                ],
             ],
         ]);
     }
@@ -40,10 +43,13 @@ class OrderHistoryService
         }
 
         $timeline = $history->timeline ?? [];
-        $timeline[] = [
+        $newEntry[] = [
             'title' => $title,
             'time' => $time ?? now(),
         ];
+
+        $this->validateTimelineEntry($newEntry); // Validate the new entry
+        $timeline[] = $newEntry;
 
         $history->update(['timeline' => $timeline]);
     }
@@ -69,5 +75,12 @@ class OrderHistoryService
         }
 
         $history->update([$field => $time ?? now()]);
+    }
+
+    private function validateTimelineEntry(array $entry): void
+    {
+        if (!isset($entry['title']) || !isset($entry['time'])) {
+            throw new \InvalidArgumentException('Invalid timeline entry: Missing "title" or "time".');
+        }
     }
 }

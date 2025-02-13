@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\Delivery\Services\DeliveryService;
 use Modules\Invoice\Services\InvoiceService;
-use Modules\Payment\Services\PaymentService;
 use Modules\Order\Models\Order;
+use Modules\Payment\Services\PaymentService;
 
 class OrderService
 {
@@ -77,6 +77,18 @@ class OrderService
     public function updateOrderStatus(Order $order, string $status): void
     {
         $order->update(['status' => $status]);
+    }
+
+    /**
+     * Mark order as completed and update order status.
+     *
+     * @param Order $order
+     * @return void
+     */
+    public function markOrderCompleted(Order $order): void
+    {
+        // Mark the order as completed
+        $this->updateOrderStatus($order, 'completed');
     }
 
     /**

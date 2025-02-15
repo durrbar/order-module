@@ -2,15 +2,19 @@
 
 namespace Modules\Order\Models;
 
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Modules\Address\Models\Address;
+use Modules\Order\Observers\OrderObserver;
 
 // use Modules\Order\Database\Factories\OrderFactory;
 
+#[ObservedBy([OrderObserver::class])]
 class Order extends Model
 {
     use HasFactory;
@@ -95,5 +99,46 @@ class Order extends Model
     public function hasPhysicalItems(): bool
     {
         return $this->items()->where('type', 'physical')->exists();
+    }
+
+    /**
+     * MorphToMany relationship to addresses.
+     */
+    public function addresses()
+    {
+        return $this->morphToMany(Address::class, 'addressable')
+                    ->withPivot('type'); // Include the 'type' column from the pivot table
+    }
+
+    /**
+     * Get the billing address for the order.
+     */
+    public function billingAddress()
+    {
+        return $this->addresses()->wherePivot('type', 'billing')->first();
+    }
+
+    /**
+     * Get the shipping address for the order.
+     */
+    public function shippingAddress()
+    {
+        return $this->addresses()->wherePivot('type', 'shipping')->first();
+    }
+
+    /**
+     * Check if the order has a billing address.
+     */
+    public function hasBillingAddress()
+    {
+        return $this->addresses()->wherePivot('type', 'billing')->exists();
+    }
+
+    /**
+     * Check if the order has a shipping address.
+     */
+    public function hasShippingAddress()
+    {
+        return $this->addresses()->wherePivot('type', 'shipping')->exists();
     }
 }

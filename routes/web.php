@@ -14,6 +14,6 @@ use Modules\Order\Http\Controllers\OrderController;
 |
 */
 
-Route::group([], function () {
-    Route::resource('order', OrderController::class)->names('order');
-});
+// Route::group([], function () {
+//     Route::resource('order', OrderController::class)->names('order');
+// });

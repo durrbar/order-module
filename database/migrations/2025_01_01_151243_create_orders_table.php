@@ -15,11 +15,8 @@ return new class () extends Migration {
 
             $table->string('order_number')->unique();
             $table->enum('status', ['pending', 'processing', 'completed', 'failed', 'canceled', 'refunded'])->default('pending');
-            $table->foreignUuid('customer_id')->constrained('users')->cascadeOnDelete(); // Link to a user or customer
+            $table->foreignUuid('customer_id')->constrained('users')->cascadeOnDelete();
             $table->decimal('total_amount', 10, 2);
-            $table->foreignUuid('invoice_id')->constrained()->cascadeOnDelete()->nullable(); // Link to Invoice
-            $table->foreignUuid('payment_id')->constrained()->cascadeOnDelete()->nullable(); // Link to Payment
-            $table->foreignUuid('delivery_id')->constrained()->cascadeOnDelete()->nullable(); // Link to Delivery
 
             $table->timestamps();
         });

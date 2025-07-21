@@ -2,15 +2,16 @@
 
 namespace Modules\Order\Events;
 
-use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Modules\Order\Models\Order;
 
-class OrderCompletedEvent
+class OrderDelivered implements ShouldQueue
 {
-    use Dispatchable;
+    public Order $order;
 
-    public $order;
-
+    /**
+     * Create a new event instance.
+     */
     public function __construct(Order $order)
     {
         $this->order = $order;

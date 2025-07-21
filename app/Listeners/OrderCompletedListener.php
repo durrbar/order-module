@@ -1,4 +1,5 @@
 <?php
+
 namespace Modules\Order\Listeners;
 
 use Modules\Order\Events\OrderCompletedEvent;

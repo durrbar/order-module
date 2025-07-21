@@ -3,8 +3,8 @@
 namespace Modules\Order\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 // use Modules\Order\Database\Factories\OrderFactory;
@@ -49,8 +49,6 @@ class OrderItem extends Model
 
     /**
      * Check if the item is a service (e.g., tour, course).
-     *
-     * @return bool
      */
     public function isService(): bool
     {

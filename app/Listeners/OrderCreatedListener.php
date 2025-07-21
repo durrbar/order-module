@@ -22,8 +22,8 @@ class OrderCreatedListener
         $this->orderHistoryService->createInitialHistory($event->order);
 
         // If the order was created via a web request, set a flag
-        if (!request()->isJson() && !request()->wantsJson()) {
-            app()->instance('web_created_order_' . $order->id, true);
+        if (! request()->isJson() && ! request()->wantsJson()) {
+            app()->instance('web_created_order_'.$order->id, true);
         }
     }
 }

@@ -9,7 +9,6 @@ use Modules\Order\Models\Order;
 
 class OrderService
 {
-
     // /**
     //  * Create a new order and initialize its history.
     //  *
@@ -42,13 +41,9 @@ class OrderService
     //     }
     // }
 
-    
-
     /**
      * Create a new order and initialize its history, invoice, payment, and delivery.
      *
-     * @param array $checkoutData
-     * @return Order
      * @throws Exception
      */
     public function createOrder(array $checkoutData): Order
@@ -106,20 +101,14 @@ class OrderService
 
     /**
      * Generate a unique order number.
-     *
-     * @return string
      */
     private function generateOrderNumber(): string
     {
-        return 'ORD-' . now()->format('Ymd') . strtoupper(bin2hex(random_bytes(4)));
+        return 'ORD-'.now()->format('Ymd').strtoupper(bin2hex(random_bytes(4)));
     }
 
     /**
      * Update the order status after a successful payment.
-     *
-     * @param Order $order
-     * @param string $status
-     * @return void
      */
     public function updateOrderStatus(Order $order, string $status): void
     {
@@ -128,9 +117,6 @@ class OrderService
 
     /**
      * Mark order as completed and update order status.
-     *
-     * @param Order $order
-     * @return void
      */
     public function markOrderCompleted(Order $order): void
     {
@@ -140,11 +126,6 @@ class OrderService
 
     /**
      * Sync the order status with the invoice and delivery statuses.
-     *
-     * @param Order $order
-     * @param string $invoiceStatus
-     * @param string $deliveryStatus
-     * @return void
      */
     public function syncStatuses(Order $order, string $invoiceStatus, string $deliveryStatus): void
     {

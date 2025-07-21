@@ -9,9 +9,6 @@ class OrderHistoryService
 {
     /**
      * Create initial order history when an order is created.
-     *
-     * @param Order $order
-     * @return OrderHistory
      */
     public function createInitialHistory(Order $order): OrderHistory
     {
@@ -20,7 +17,7 @@ class OrderHistoryService
             'timeline' => [
                 [
                     'title' => 'Order has been created',
-                    'time' => now()
+                    'time' => now(),
                 ],
             ],
         ]);
@@ -29,16 +26,13 @@ class OrderHistoryService
     /**
      * Update order history timeline with new events.
      *
-     * @param Order $order
-     * @param string $title
-     * @param \DateTime|string|null $time
-     * @return void
+     * @param  \DateTime|string|null  $time
      */
     public function addTimelineEvent(Order $order, string $title, $time = null): void
     {
         $history = $order->history;
 
-        if (!$history) {
+        if (! $history) {
             throw new \Exception('Order history not found.');
         }
 
@@ -57,20 +51,17 @@ class OrderHistoryService
     /**
      * Update specific timestamps in the order history.
      *
-     * @param Order $order
-     * @param string $field
-     * @param \DateTime|string|null $time
-     * @return void
+     * @param  \DateTime|string|null  $time
      */
     public function updateTimestamp(Order $order, string $field, $time = null): void
     {
         $history = $order->history;
 
-        if (!$history) {
+        if (! $history) {
             throw new \Exception('Order history not found.');
         }
 
-        if (!in_array($field, ['order_time', 'payment_time', 'delivery_time', 'completion_time'])) {
+        if (! in_array($field, ['order_time', 'payment_time', 'delivery_time', 'completion_time'])) {
             throw new \Exception("Invalid timestamp field: $field");
         }
 
@@ -79,7 +70,7 @@ class OrderHistoryService
 
     private function validateTimelineEntry(array $entry): void
     {
-        if (!isset($entry['title']) || !isset($entry['time'])) {
+        if (! isset($entry['title']) || ! isset($entry['time'])) {
             throw new \InvalidArgumentException('Invalid timeline entry: Missing "title" or "time".');
         }
     }

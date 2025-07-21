@@ -9,6 +9,7 @@ use Modules\Order\Services\OrderService;
 class DeliveryCompletedListener
 {
     protected OrderService $orderService;
+
     protected OrderHistoryService $orderHistoryService;
 
     /**
@@ -22,9 +23,6 @@ class DeliveryCompletedListener
 
     /**
      * Handle the event.
-     *
-     * @param DeliveryCompletedEvent $event
-     * @return void
      */
     public function handle(DeliveryCompletedEvent $event): void
     {

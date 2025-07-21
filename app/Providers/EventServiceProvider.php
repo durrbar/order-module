@@ -3,10 +3,10 @@
 namespace Modules\Order\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Modules\Payment\Events\PaymentSuccessEvent;
 use Modules\Delivery\Events\DeliveryCompletedEvent;
-use Modules\Order\Listeners\PaymentSuccessListener;
 use Modules\Order\Listeners\DeliveryCompletedListener;
+use Modules\Order\Listeners\PaymentSuccessListener;
+use Modules\Payment\Events\PaymentSuccessEvent;
 
 class EventServiceProvider extends ServiceProvider
 {

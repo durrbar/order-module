@@ -2,8 +2,8 @@
 
 namespace Modules\Order\Observers;
 
-use Modules\Order\Events\OrderCreatedEvent;
 use Modules\Order\Events\OrderCompletedEvent;
+use Modules\Order\Events\OrderCreatedEvent;
 use Modules\Order\Events\OrderPaidEvent;
 use Modules\Order\Models\Order;
 

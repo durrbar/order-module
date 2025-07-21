@@ -34,14 +34,14 @@ class OrderAdminController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $cacheKey = self::CACHE_ADMIN_ORDERS . $request->query('page', 1);
+        $cacheKey = self::CACHE_ADMIN_ORDERS.$request->query('page', 1);
         $cacheDuration = now()->addMinutes(config('cache.duration'));
 
         return Cache::remember($cacheKey, $cacheDuration, function () {
             return QueryBuilder::for(Order::class)
-            ->allowedFields('')->with(['customer', 'items', 'invoice', 'payment', 'delivery'])
-            ->allowedFilters([AllowedFilter::exact('')])->allowedSorts('created_at')
-            ->paginate(10);
+                ->allowedFields('')->with(['customer', 'items', 'invoice', 'payment', 'delivery'])
+                ->allowedFilters([AllowedFilter::exact('')])->allowedSorts('created_at')
+                ->paginate(10);
         });
 
         return response()->json(['orders' => new OrderCollection($orders)]);
@@ -61,7 +61,7 @@ class OrderAdminController extends Controller
             $order = $this->orderService->createOrder($orderData);
 
         } catch (\Exception $e) {
-            return $this->handleError(self::ERROR_CREATE . ': ' . $e->getMessage(), $request);
+            return $this->handleError(self::ERROR_CREATE.': '.$e->getMessage(), $request);
         }
     }
 
@@ -100,9 +100,9 @@ class OrderAdminController extends Controller
     /**
      * Handle error responses.
      *
-     * @param string $message The error message to be logged and returned in the response.
-     * @param Request|null $request The HTTP request that triggered the error, if available.
-     * @param int $statusCode The HTTP status code for the response (default is 500).
+     * @param  string  $message  The error message to be logged and returned in the response.
+     * @param  Request|null  $request  The HTTP request that triggered the error, if available.
+     * @param  int  $statusCode  The HTTP status code for the response (default is 500).
      * @return JsonResponse A JSON response containing the success status and error message.
      */
     protected function handleError(string $message, ?Request $request = null, int $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR): JsonResponse

@@ -2,143 +2,117 @@
 
 namespace Modules\Order\Models;
 
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Modules\Address\Models\Address;
-use Modules\Order\Observers\OrderObserver;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Coupon\Models\Coupon;
+use Modules\Ecommerce\Models\PaymentIntent;
+use Modules\Ecommerce\Models\Product;
+use Modules\Ecommerce\Models\Review;
+use Modules\Ecommerce\Models\Shop;
+use Modules\Ecommerce\Models\User;
+use Modules\Ecommerce\Traits\TranslationTrait;
+use Modules\Refund\Models\Refund;
 
-// use Modules\Order\Database\Factories\OrderFactory;
-
-#[ObservedBy([OrderObserver::class])]
 class Order extends Model
 {
-    use HasFactory;
-    use HasUuids;
+    use SoftDeletes;
+    use TranslationTrait;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
+    protected $table = 'orders';
 
-    // protected static function newFactory(): OrderFactory
-    // {
-    //     // return OrderFactory::new();
-    // }
+    public $guarded = [];
 
-    // Relationships
-    public function customer(): BelongsTo
+    protected $casts = [
+        'shipping_address' => 'json',
+        'billing_address' => 'json',
+        'payment_intent_info' => 'json',
+    ];
+
+    protected $hidden = [
+        //        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
+    protected static function boot()
     {
-        return $this->belongsTo(config('order.customer.model'), 'customer_id');
+        parent::boot();
+        // Order by created_at desc
+        static::addGlobalScope('order', function (Builder $builder): void {
+            $builder->orderBy('created_at', 'desc');
+        });
     }
 
-    public function invoice(): HasOne
+    protected $with = ['customer', 'products.variation_options'];
+
+    public function products(): belongsToMany
     {
-        return $this->hasOne(config('order.invoice.model'), 'order_id', 'id');
+        return $this->belongsToMany(Product::class)
+            ->withPivot('order_quantity', 'unit_price', 'subtotal', 'variation_option_id')
+            ->withTimestamps();
     }
 
-    public function payment(): HasOne
+    public function coupon(): belongsTo
     {
-        return $this->hasOne(config('order.payment.model'), 'order_id', 'id');
+        return $this->belongsTo(Coupon::class, 'coupon_id');
     }
 
-    public function delivery(): HasOne
+    public function customer(): belongsTo
     {
-        return $this->hasOne(config('order.delivery.model'), 'order_id', 'id');
+        return $this->belongsTo(User::class, 'customer_id');
     }
 
-    public function items(): HasMany
+    public function shop(): BelongsTo
     {
-        return $this->hasMany(OrderItem::class, 'order_id', 'id');
-    }
-
-    public function history(): HasOne
-    {
-        return $this->hasOne(OrderHistory::class, 'order_id', 'id');
-    }
-
-    /**
-     * Get all physical items in the order.
-     *
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getPhysicalItems()
-    {
-        return $this->items()->where('type', 'physical')->get();
-    }
-
-    /**
-     * Get all digital items in the order.
-     *
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getDigitalItems()
-    {
-        return $this->items()->where('type', 'digital')->get();
+        return $this->belongsTo(Shop::class, 'shop_id');
     }
 
     /**
-     * Get all service items in the order.
-     *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return HasMany
      */
-    public function getServiceItems()
+    public function children()
     {
-        return $this->items()->where('type', 'service')->get();
+        return $this->hasMany('Modules\Ecommerce\Models\Order', 'parent_id', 'id');
     }
 
     /**
-     * Check if the order contains any physical items.
-     *
-     * @return bool
+     * @return HasOne
      */
-    public function hasPhysicalItems(): bool
+    public function parent_order()
     {
-        return $this->items()->where('type', 'physical')->exists();
+        return $this->hasOne('Modules\Ecommerce\Models\Order', 'id', 'parent_id');
     }
 
     /**
-     * MorphToMany relationship to addresses.
+     * @return HasOne
      */
-    public function addresses()
+    public function refund()
     {
-        return $this->morphToMany(Address::class, 'addressable')
-                    ->withPivot('type'); // Include the 'type' column from the pivot table
+        return $this->hasOne(Refund::class, 'order_id');
     }
 
     /**
-     * Get the billing address for the order.
+     * @return HasOne
      */
-    public function billingAddress()
+    public function wallet_point()
     {
-        return $this->addresses()->wherePivot('type', 'billing')->first();
+        return $this->hasOne(OrderWalletPoint::class, 'order_id');
     }
 
     /**
-     * Get the shipping address for the order.
+     * @return HasMany
      */
-    public function shippingAddress()
+    public function payment_intent()
     {
-        return $this->addresses()->wherePivot('type', 'shipping')->first();
+        return $this->hasMany(PaymentIntent::class);
     }
 
-    /**
-     * Check if the order has a billing address.
-     */
-    public function hasBillingAddress()
+    public function reviews(): HasMany
     {
-        return $this->addresses()->wherePivot('type', 'billing')->exists();
-    }
-
-    /**
-     * Check if the order has a shipping address.
-     */
-    public function hasShippingAddress()
-    {
-        return $this->addresses()->wherePivot('type', 'shipping')->exists();
+        return $this->hasMany(Review::class);
     }
 }

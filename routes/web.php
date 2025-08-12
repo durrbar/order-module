@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Order\Http\Controllers\CheckoutController;
+use Modules\Order\Http\Controllers\DownloadController;
 use Modules\Order\Http\Controllers\OrderController;
 use Modules\Role\Enums\Permission;
 
@@ -31,6 +32,9 @@ Route::post('orders/payment', [OrderController::class, 'submitPayment']);
 
 Route::post('orders/checkout/verify', [CheckoutController::class, 'verify']);
 
+
+Route::get('download_url/token/{token}', [DownloadController::class, 'downloadFile'])->name('download_url.token');
+
 /**
  * ******************************************
  * Authorized Route for Customers only
@@ -41,6 +45,9 @@ Route::group(['middleware' => ['can:'.Permission::CUSTOMER, 'auth:sanctum', 'ema
         'only' => ['index'],
     ]);
     Route::get('orders/tracking-number/{tracking_number}', [OrderController::class, 'findByTrackingNumber']);
+
+    Route::get('downloads', [DownloadController::class, 'fetchDownloadableFiles']);
+    Route::post('downloads/digital_file', [DownloadController::class, 'generateDownloadableUrl']);
 });
 
 /**

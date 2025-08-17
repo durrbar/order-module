@@ -3,22 +3,24 @@
 namespace Modules\Order\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Coupon\Models\Coupon;
-use Modules\Ecommerce\Models\PaymentIntent;
 use Modules\Ecommerce\Models\Product;
-use Modules\Ecommerce\Models\Review;
-use Modules\Ecommerce\Models\Shop;
-use Modules\Ecommerce\Models\User;
 use Modules\Ecommerce\Traits\TranslationTrait;
+use Modules\Payment\Models\PaymentIntent;
 use Modules\Refund\Models\Refund;
+use Modules\Review\Models\Review;
+use Modules\User\Models\User;
+use Modules\Vendor\Models\Shop;
 
 class Order extends Model
 {
+    use HasUuids;
     use SoftDeletes;
     use TranslationTrait;
 

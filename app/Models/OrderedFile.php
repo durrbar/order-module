@@ -2,11 +2,14 @@
 
 namespace Modules\Order\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderedFile extends Model
 {
+    use HasUuids;
+    
     protected $table = 'ordered_files';
 
     public $guarded = [];

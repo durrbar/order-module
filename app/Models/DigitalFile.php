@@ -2,10 +2,13 @@
 
 namespace Modules\Order\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class DigitalFile extends Model
 {
+    use HasUuids;
+    
     protected $table = 'digital_files';
 
     public $guarded = [];

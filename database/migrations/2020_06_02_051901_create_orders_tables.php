@@ -105,11 +105,11 @@ return new class () extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('orders');
         Schema::dropIfExists('order_product');
         Schema::dropIfExists('order_wallet_points');
         Schema::dropIfExists('ordered_files');
-        Schema::dropIfExists('digital_files');
+        Schema::dropIfExists('orders');
         Schema::dropIfExists('download_tokens');
+        Schema::dropIfExists('digital_files');
     }
 };

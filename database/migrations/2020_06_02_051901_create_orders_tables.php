@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Modules\Order\Enums\OrderStatus;
 use Modules\Payment\Enums\PaymentStatus;
 
-return new class () extends Migration {
+return new class() extends Migration
+{
     /**
      * Run the migrations.
      *
@@ -17,7 +20,7 @@ return new class () extends Migration {
         Schema::create('orders', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('tracking_number')->unique();
-            // $table->uuid('customer_id')->nullable();
+            $table->foreignUuid('customer_id')->nullable()->constrained('users');
             $table->string('customer_contact');
             $table->string('customer_name')->nullable();
             $table->double('amount');
@@ -37,27 +40,23 @@ return new class () extends Migration {
             $table->enum('payment_status', PaymentStatus::getValues())->default(PaymentStatus::PENDING);
             $table->softDeletes();
             $table->timestamps();
-            $table->foreignUuid('customer_id')->references('id')->on('users')->nullable();
         });
 
         Schema::create('order_product', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            // $table->uuid('order_id');
-            // $table->uuid('product_id');
+            $table->foreignUuid('order_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('product_id')->constrained()->cascadeOnDelete();
             $table->string('order_quantity');
             $table->double('unit_price');
             $table->double('subtotal');
             $table->softDeletes();
             $table->timestamps();
-            $table->foreignUuid('order_id')->references('id')->on('orders')->onDelete('cascade');
-            $table->foreignUuid('product_id')->references('id')->on('products')->onDelete('cascade');
         });
 
         Schema::create('order_wallet_points', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->double('amount')->nullable();
-            $table->uuid('order_id')->nullable();
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->foreignUuid('order_id')->nullable()->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
 
@@ -73,9 +72,8 @@ return new class () extends Migration {
         Schema::create('download_tokens', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('token');
-            $table->uuid('digital_file_id')->nullable();
+            $table->foreignUuid('digital_file_id')->nullable()->constrained()->cascadeOnDelete();
             $table->text('payload')->nullable();
-            $table->foreign('digital_file_id')->references('id')->on('digital_files')->onDelete('cascade');
             $table->uuid('user_id');
             $table->timestamps();
         });
@@ -83,12 +81,9 @@ return new class () extends Migration {
         Schema::create('ordered_files', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('purchase_key');
-            $table->uuid('digital_file_id');
-            $table->foreign('digital_file_id')->references('id')->on('digital_files')->onDelete('cascade');
-            $table->string('tracking_number')->nullable();
-            $table->foreign('tracking_number')->references('tracking_number')->on('orders')->onDelete('cascade');
-            $table->uuid('customer_id');
-            $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignUuid('digital_file_id')->constrained()->cascadeOnDelete();
+            $table->string('tracking_number')->nullable()->constrained('orders', 'tracking_number')->cascadeOnDelete();
+            $table->foreignUuid('customer_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
 

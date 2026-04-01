@@ -42,7 +42,7 @@ class OrderController extends CoreController
 
     public OrderRepository $repository;
 
-    public Settings $settings;
+    public ?Settings $settings;
 
     public function __construct(OrderRepository $repository)
     {

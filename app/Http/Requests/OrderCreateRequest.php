@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Http\Requests;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Validation\Rule;
-use Modules\Ecommerce\Enums\PaymentGatewayType;
+use Illuminate\Validation\Rules\Enum;
+use Modules\Payment\Enums\PaymentGatewayType;
 
-class OrderCreateRequest extends FormRequest
+final class OrderCreateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -38,7 +40,7 @@ class OrderCreateRequest extends FormRequest
             'delivery_time' => 'nullable|string',
             'customer_contact' => 'string|required',
             'customer_name' => 'nullable|string',
-            'payment_gateway' => ['required', Rule::in(PaymentGatewayType::getValues())],
+            'payment_gateway' => ['required', new Enum(PaymentGatewayType::class)],
             'altered_payment_gateway' => 'nullable|string',
             'products' => 'required|array',
             'card' => 'array',

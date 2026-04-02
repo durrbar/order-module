@@ -1,13 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Observers;
 
+use Modules\Order\Enums\OrderLegacyStatus;
 use Modules\Order\Events\OrderCompletedEvent;
 use Modules\Order\Events\OrderCreatedEvent;
 use Modules\Order\Events\OrderPaidEvent;
 use Modules\Order\Models\Order;
 
-class OrderObserver
+final class OrderObserver
 {
     /**
      * Handle the Order "created" event.
@@ -24,9 +27,9 @@ class OrderObserver
     public function updated(Order $order): void
     {
         if ($order->isDirty('status')) {
-            if ($order->status === 'paid') {
+            if ($order->status === OrderLegacyStatus::Paid->value) {
                 event(new OrderPaidEvent($order));
-            } elseif ($order->status === 'completed') {
+            } elseif ($order->status === OrderLegacyStatus::Completed->value) {
                 event(new OrderCompletedEvent($order));
             }
         }

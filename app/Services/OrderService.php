@@ -1,10 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Services;
 
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Modules\Delivery\Enums\DeliveryStatus;
+use Modules\Invoice\Enums\InvoicePaymentStatus;
+use Modules\Order\Enums\OrderLegacyStatus;
 use Modules\Order\Models\Order;
 
 class OrderService
@@ -59,7 +64,7 @@ class OrderService
                 // Create the order
                 $order = Order::create([
                     'order_number' => $this->generateOrderNumber(),
-                    'status' => 'pending', // Default status
+                    'status' => OrderLegacyStatus::Pending->value, // Default status
                     'customer_id' => Auth::id(),
                     'total_amount' => $checkoutData['total'],
                     'discount' => $checkoutData['discount'],
@@ -100,14 +105,6 @@ class OrderService
     }
 
     /**
-     * Generate a unique order number.
-     */
-    private function generateOrderNumber(): string
-    {
-        return 'ORD-'.now()->format('Ymd').strtoupper(bin2hex(random_bytes(4)));
-    }
-
-    /**
      * Update the order status after a successful payment.
      */
     public function updateOrderStatus(Order $order, string $status): void
@@ -121,7 +118,7 @@ class OrderService
     public function markOrderCompleted(Order $order): void
     {
         // Mark the order as completed
-        $this->updateOrderStatus($order, 'completed');
+        $this->updateOrderStatus($order, OrderLegacyStatus::Completed->value);
     }
 
     /**
@@ -130,10 +127,23 @@ class OrderService
     public function syncStatuses(Order $order, string $invoiceStatus, string $deliveryStatus): void
     {
         // Sync the order status with the invoice and delivery statuses
-        if ($invoiceStatus === 'paid' && $deliveryStatus === 'completed') {
-            $order->update(['status' => 'completed']);
-        } elseif ($invoiceStatus === 'failed' || $deliveryStatus === 'failed') {
-            $order->update(['status' => 'failed']);
+        $invoicePaid = $invoiceStatus === InvoicePaymentStatus::Paid->value;
+        $invoiceFailed = $invoiceStatus === InvoicePaymentStatus::Failed->value;
+        $deliveryCompleted = in_array($deliveryStatus, ['completed', DeliveryStatus::Delivered->value], true);
+        $deliveryFailed = $deliveryStatus === DeliveryStatus::Failed->value || $deliveryStatus === 'failed';
+
+        if ($invoicePaid && $deliveryCompleted) {
+            $order->update(['status' => OrderLegacyStatus::Completed->value]);
+        } elseif ($invoiceFailed || $deliveryFailed) {
+            $order->update(['status' => OrderLegacyStatus::Failed->value]);
         }
+    }
+
+    /**
+     * Generate a unique order number.
+     */
+    private function generateOrderNumber(): string
+    {
+        return 'ORD-'.now()->format('Ymd').mb_strtoupper(bin2hex(random_bytes(4)));
     }
 }

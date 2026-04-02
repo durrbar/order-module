@@ -36,8 +36,14 @@ return new class() extends Migration
             $table->uuid('logistics_provider')->nullable();
             $table->double('delivery_fee')->nullable();
             $table->string('delivery_time')->nullable();
-            $table->enum('order_status', OrderStatus::getValues())->default(OrderStatus::PENDING);
-            $table->enum('payment_status', PaymentStatus::getValues())->default(PaymentStatus::PENDING);
+            $table->enum(
+                'order_status',
+                OrderStatus::cases()
+            )->default(OrderStatus::Pending->value);
+            $table->enum(
+                'payment_status',
+                PaymentStatus::cases()
+            )->default(PaymentStatus::Pending->value);
             $table->softDeletes();
             $table->timestamps();
         });

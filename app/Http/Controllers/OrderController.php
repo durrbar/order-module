@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Http\Controllers;
 
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
@@ -32,7 +34,7 @@ use Modules\Settings\Models\Settings;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class OrderController extends CoreController
+final class OrderController extends CoreController
 {
     use OrderManagementTrait;
     use PaymentStatusManagerWithOrderTrait;
@@ -77,29 +79,29 @@ class OrderController extends CoreController
         }
 
         switch ($user) {
-            case $user->hasPermissionTo(Permission::SUPER_ADMIN):
+            case $user->hasPermissionTo(Permission::SuperAdmin->value):
                 return $this->repository->with('children')->where('id', '!=', null)->where('parent_id', '=', null);
                 break;
 
-            case $user->hasPermissionTo(Permission::STORE_OWNER):
+            case $user->hasPermissionTo(Permission::StoreOwner->value):
                 if ($this->repository->hasPermission($user, $request->shop_id)) {
                     return $this->repository->with('children')->where('shop_id', '=', $request->shop_id)->where('parent_id', '!=', null);
-                } else {
-                    $shopIds = $user->shops()->pluck('id');
-                    $orders = $this->repository->with('children')->where('parent_id', '!=', null)->whereIn('shop_id', $shopIds);
-
-                    return $orders;
                 }
+                $shopIds = $user->shops()->pluck('id');
+                $orders = $this->repository->with('children')->where('parent_id', '!=', null)->whereIn('shop_id', $shopIds);
+
+                return $orders;
+
                 break;
 
-            case $user->hasPermissionTo(Permission::STAFF):
+            case $user->hasPermissionTo(Permission::Staff->value):
                 if ($this->repository->hasPermission($user, $request->shop_id)) {
                     return $this->repository->with('children')->where('shop_id', '=', $request->shop_id)->where('parent_id', '!=', null);
-                } else {
-                    $orders = $this->repository->with('children')->where('parent_id', '!=', null)->where('shop_id', '=', $user->shop_id);
-
-                    return $orders;
                 }
+                $orders = $this->repository->with('children')->where('parent_id', '!=', null)->where('shop_id', '=', $user->shop_id);
+
+                return $orders;
+
                 break;
 
             default:
@@ -109,12 +111,12 @@ class OrderController extends CoreController
 
         // ********************* Old code *********************
 
-        // if ($user && $user->hasPermissionTo(Permission::SUPER_ADMIN) && (!isset($request->shop_id) || $request->shop_id === 'undefined')) {
+        // if ($user && $user->hasPermissionTo(Permission::SuperAdmin->value) && (!isset($request->shop_id) || $request->shop_id === 'undefined')) {
         //     return $this->repository->with('children')->where('id', '!=', null)->where('parent_id', '=', null); //->paginate($limit);
         // } else if ($this->repository->hasPermission($user, $request->shop_id)) {
-        //     // if ($user && $user->hasPermissionTo(Permission::STORE_OWNER)) {
+        //     // if ($user && $user->hasPermissionTo(Permission::StoreOwner->value)) {
         //     return $this->repository->with('children')->where('shop_id', '=', $request->shop_id)->where('parent_id', '!=', null); //->paginate($limit);
-        //     // } elseif ($user && $user->hasPermissionTo(Permission::STAFF)) {
+        //     // } elseif ($user && $user->hasPermissionTo(Permission::Staff->value)) {
         //     //     return $this->repository->with('children')->where('shop_id', '=', $request->shop_id)->where('parent_id', '!=', null); //->paginate($limit);
         //     // }
         // } else {
@@ -186,7 +188,7 @@ class OrderController extends CoreController
 
         // Create Intent
         if (! in_array($order->payment_gateway, [
-            PaymentGatewayType::CASH, PaymentGatewayType::CASH_ON_DELIVERY, PaymentGatewayType::FULL_WALLET_PAYMENT,
+            PaymentGatewayType::Cash->value, PaymentGatewayType::CashOnDelivery->value, PaymentGatewayType::FullWalletPayment->value,
         ])) {
             // $order['payment_intent'] = $this->processPaymentIntent($request, $this->settings);
             $order['payment_intent'] = $this->attachPaymentIntent($orderParam);
@@ -195,13 +197,14 @@ class OrderController extends CoreController
         if (! $order->customer_id) {
             return $order;
         }
-        if ($user && $user->hasPermissionTo(Permission::SUPER_ADMIN)) {
+        if ($user && $user->hasPermissionTo(Permission::SuperAdmin->value)) {
             return $order;
-        } elseif (isset($order->shop_id)) {
-            if ($user && ($this->repository->hasPermission($user, $order->shop_id) || $user->id == $order->customer_id)) {
+        }
+        if (isset($order->shop_id)) {
+            if ($user && ($this->repository->hasPermission($user, $order->shop_id) || $user->id === $order->customer_id)) {
                 return $order;
             }
-        } elseif ($user && $user->id == $order->customer_id) {
+        } elseif ($user && $user->id === $order->customer_id) {
             return $order;
         } else {
             throw new AuthorizationException(NOT_AUTHORIZED);
@@ -227,9 +230,8 @@ class OrderController extends CoreController
             }
             if ($user && ($user->id === $order->customer_id || $user->can('super_admin'))) {
                 return $order;
-            } else {
-                throw new AuthorizationException(NOT_AUTHORIZED);
             }
+            throw new AuthorizationException(NOT_AUTHORIZED);
         } catch (DurrbarException $e) {
             throw new DurrbarException(NOT_FOUND);
         }
@@ -349,7 +351,7 @@ class OrderController extends CoreController
 
             $payload = [
                 'user_id' => $user->id,
-                'order_id' => intval($request->order_id),
+                'order_id' => (int) ($request->order_id),
                 'language' => $language,
                 'translated_text' => $translatedText,
                 'is_rtl' => $isRTL,
@@ -432,47 +434,47 @@ class OrderController extends CoreController
 
             switch ($order->payment_gateway) {
 
-                case PaymentGatewayType::STRIPE:
+                case PaymentGatewayType::Stripe->value:
                     $this->stripe($order, $request, $this->settings);
                     break;
 
-                case PaymentGatewayType::PAYPAL:
+                case PaymentGatewayType::Paypal->value:
                     $this->paypal($order, $request, $this->settings);
                     break;
 
-                case PaymentGatewayType::MOLLIE:
+                case PaymentGatewayType::Mollie->value:
                     $this->mollie($order, $request, $this->settings);
                     break;
 
-                case PaymentGatewayType::RAZORPAY:
+                case PaymentGatewayType::Razorpay->value:
                     $this->razorpay($order, $request, $this->settings);
                     break;
 
-                case PaymentGatewayType::SSLCOMMERZ:
+                case PaymentGatewayType::Sslcommerz->value:
                     $this->sslcommerz($order, $request, $this->settings);
                     break;
 
-                case PaymentGatewayType::PAYSTACK:
+                case PaymentGatewayType::Paystack->value:
                     $this->paystack($order, $request, $this->settings);
                     break;
 
-                case PaymentGatewayType::PAYMONGO:
+                case PaymentGatewayType::Paymongo->value:
                     $this->paymongo($order, $request, $this->settings);
                     break;
 
-                case PaymentGatewayType::XENDIT:
+                case PaymentGatewayType::Xendit->value:
                     $this->xendit($order, $request, $this->settings);
                     break;
 
-                case PaymentGatewayType::IYZICO:
+                case PaymentGatewayType::Iyzico->value:
                     $this->iyzico($order, $request, $this->settings);
                     break;
 
-                case PaymentGatewayType::BKASH:
+                case PaymentGatewayType::Bkash->value:
                     $this->bkash($order, $request, $this->settings);
                     break;
 
-                case PaymentGatewayType::FLUTTERWAVE:
+                case PaymentGatewayType::Flutterwave->value:
                     $this->flutterwave($order, $request, $this->settings);
                     break;
             }

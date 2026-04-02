@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Repositories;
 
 use Carbon\Carbon;
@@ -38,8 +40,9 @@ use Modules\User\Models\User;
 use Modules\Vendor\Models\Balance;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Prettus\Repository\Exceptions\RepositoryException;
+use Throwable;
 
-class OrderRepository extends BaseRepository
+final class OrderRepository extends BaseRepository
 {
     use CalculatePaymentTrait;
     use OrderManagementTrait;
@@ -116,33 +119,33 @@ class OrderRepository extends BaseRepository
         //     'wallet_currency' => 0
         // ]);
 
-        $fullWalletOrCODPayment = $request?->isFullWalletPayment ? PaymentGatewayType::FULL_WALLET_PAYMENT : PaymentGatewayType::CASH_ON_DELIVERY;
+        $fullWalletOrCODPayment = $request?->isFullWalletPayment ? PaymentGatewayType::FullWalletPayment->value : PaymentGatewayType::CashOnDelivery->value;
         $payment_gateway_type = ! empty($request->payment_gateway) ? $request->payment_gateway : $fullWalletOrCODPayment;
 
         switch ($payment_gateway_type) {
-            case PaymentGatewayType::CASH_ON_DELIVERY:
-                $request['order_status'] = OrderStatus::PROCESSING;
-                $request['payment_status'] = PaymentStatus::CASH_ON_DELIVERY;
+            case PaymentGatewayType::CashOnDelivery->value:
+                $request['order_status'] = OrderStatus::Processing->value;
+                $request['payment_status'] = PaymentStatus::CashOnDelivery->value;
                 break;
 
-            case PaymentGatewayType::CASH:
-                $request['order_status'] = OrderStatus::PROCESSING;
-                $request['payment_status'] = PaymentStatus::CASH;
+            case PaymentGatewayType::Cash->value:
+                $request['order_status'] = OrderStatus::Processing->value;
+                $request['payment_status'] = PaymentStatus::Cash->value;
                 break;
 
-                // case PaymentGatewayType::FULL_WALLET_PAYMENT:
-                //     $request['order_status'] = OrderStatus::PROCESSING;
-                //     $request['payment_status'] = PaymentStatus::WALLET;
+                // case PaymentGatewayType::FullWalletPayment->value:
+                //     $request['order_status'] = OrderStatus::Processing->value;
+                //     $request['payment_status'] = PaymentStatus::Wallet->value;
                 //     break;
 
             default:
-                $request['order_status'] = OrderStatus::PENDING;
-                $request['payment_status'] = PaymentStatus::PENDING;
+                $request['order_status'] = OrderStatus::Pending->value;
+                $request['payment_status'] = PaymentStatus::Pending->value;
                 break;
         }
 
         $useWalletPoints = isset($request->use_wallet_points) ? $request->use_wallet_points : false;
-        if ($request->user() && $request->user()->hasPermissionTo(Permission::SUPER_ADMIN) && isset($request['customer_id'])) {
+        if ($request->user() && $request->user()->hasPermissionTo(Permission::SuperAdmin->value) && isset($request['customer_id'])) {
             $request['customer_id'] = $request['customer_id'];
         } else {
             $request['customer_id'] = $request->user()->id ?? null;
@@ -173,7 +176,7 @@ class OrderRepository extends BaseRepository
             }
         }
 
-        if (isset($coupon) && $coupon->type === CouponType::FREE_SHIPPING_COUPON) {
+        if (isset($coupon) && $coupon->type === CouponType::FreeShippingCoupon->value) {
             $request['delivery_fee'] = 0;
         } else {
             $request['delivery_fee'] = $request['delivery_fee'];
@@ -189,9 +192,9 @@ class OrderRepository extends BaseRepository
             }
 
             if ($amount !== null && $amount <= 0) {
-                $request['order_status'] = OrderStatus::COMPLETED;
-                $request['payment_gateway'] = PaymentGatewayType::FULL_WALLET_PAYMENT;
-                $request['payment_status'] = PaymentStatus::SUCCESS;
+                $request['order_status'] = OrderStatus::Completed->value;
+                $request['payment_gateway'] = PaymentGatewayType::FullWalletPayment->value;
+                $request['payment_status'] = PaymentStatus::Success->value;
                 $order = $this->createOrder($request);
                 $this->storeOrderWalletPoint($request['paid_total'], $order->id);
                 $this->manageWalletAmount($request['paid_total'], $user->id);
@@ -215,15 +218,15 @@ class OrderRepository extends BaseRepository
         }
         // Create Intent
         if (! in_array($order->payment_gateway, [
-            PaymentGatewayType::CASH, PaymentGatewayType::CASH_ON_DELIVERY, PaymentGatewayType::FULL_WALLET_PAYMENT,
+            PaymentGatewayType::Cash->value, PaymentGatewayType::CashOnDelivery->value, PaymentGatewayType::FullWalletPayment->value,
         ])) {
             $order['payment_intent'] = $this->processPaymentIntent($request, $settings);
         }
 
-        if ($payment_gateway_type === PaymentGatewayType::CASH_ON_DELIVERY || $payment_gateway_type === PaymentGatewayType::CASH) {
-            $this->orderStatusManagementOnCOD($order, OrderStatus::PENDING, OrderStatus::PROCESSING);
+        if ($payment_gateway_type === PaymentGatewayType::CashOnDelivery->value || $payment_gateway_type === PaymentGatewayType::Cash->value) {
+            $this->orderStatusManagementOnCOD($order, OrderStatus::Pending->value, OrderStatus::Processing->value);
         } else {
-            $this->orderStatusManagementOnPayment($order, OrderStatus::PENDING, PaymentStatus::PENDING);
+            $this->orderStatusManagementOnPayment($order, OrderStatus::Pending->value, PaymentStatus::Pending->value);
         }
 
         event(new OrderProcessed($order));
@@ -245,7 +248,7 @@ class OrderRepository extends BaseRepository
             if ($this->hasPermission($user, $order->shop_id)) {
                 return $this->changeOrderStatus($order, $request->order_status);
             }
-        } elseif ($user->hasPermissionTo(Permission::SUPER_ADMIN)) {
+        } elseif ($user->hasPermissionTo(Permission::SuperAdmin->value)) {
             return $this->changeOrderStatus($order, $request->order_status);
         } else {
             throw new AuthorizationException(NOT_AUTHORIZED);
@@ -293,35 +296,13 @@ class OrderRepository extends BaseRepository
     }
 
     /**
-     * @return array|LengthAwarePaginator|Collection|mixed
-     */
-    protected function createOrder($request)
-    {
-        try {
-            $orderInput = $request->only($this->dataArray);
-            $order = $this->create($orderInput);
-            $products = $this->processProducts($request['products'], $request['customer_id'], $order);
-            $order->products()->attach($products);
-            $this->createChildOrder($order->id, $request);
-            //  $this->calculateShopIncome($order);
-            $invoiceData = $this->createInvoiceDataForEmail($request, $order);
-            $customer = $request->user() ?? null;
-            event(new OrderCreated($order, $invoiceData, $customer));
-
-            return $order;
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
      * This function creates an array of data for an email invoice, including order information,
      * settings, translated text, and URL.
      *
      * @param request This is an HTTP request object that contains information about the current
      * request being made to the server. It is used to retrieve data from the request, such as the
      * language and whether the text should be displayed right-to-left (RTL).
-     * @param order The order object that contains information about the order, such as the customer
+     * @param Order The order object that contains information about the order, such as the customer
      * details, order items, and total amount.
      * @return array An array containing order data, settings data, translated text, RTL status,
      *               language, and a URL.
@@ -345,64 +326,6 @@ class OrderRepository extends BaseRepository
     }
 
     /**
-     * calculateShopIncome
-     *
-     * @param  mixed  $parent_order
-     * @return void
-     */
-    protected function calculateShopIncome($parent_order)
-    {
-        foreach ($parent_order->children as $order) {
-            $balance = Balance::where('shop_id', '=', $order->shop_id)->first();
-            $adminCommissionRate = $balance->admin_commission_rate;
-            $shop_earnings = ($order->total * (100 - $adminCommissionRate)) / 100;
-            $balance->total_earnings += $shop_earnings;
-            $balance->current_balance += $shop_earnings;
-            $balance->save();
-        }
-    }
-
-    /**
-     * processProducts
-     *
-     * @param  mixed  $products
-     * @param  mixed  $customer_id
-     * @param  mixed  $order
-     * @return void
-     */
-    protected function processProducts($products, $customer_id, $order)
-    {
-        foreach ($products as $key => $product) {
-            if (! isset($product['variation_option_id'])) {
-                $product['variation_option_id'] = null;
-                $products[$key] = $product;
-            }
-            try {
-                if ($order->parent_id === null) {
-                    $productData = Product::with('digital_file')->findOrFail($product['product_id']);
-
-                    // if rental product
-                    $isRentalProduct = $productData->is_rental;
-                    if ($isRentalProduct) {
-                        $this->processRentalProduct($product, $order->id);
-                    }
-
-                    if ($productData->product_type === ProductType::SIMPLE) {
-                        $this->storeOrderedFile($productData, $product['order_quantity'], $customer_id, $order->tracking_number);
-                    } elseif ($productData->product_type === ProductType::VARIABLE) {
-                        $variation_option = Variation::with('digital_file')->findOrFail($product['variation_option_id']);
-                        $this->storeOrderedFile($variation_option, $product['order_quantity'], $customer_id, $order->tracking_number);
-                    }
-                }
-            } catch (Exception $e) {
-                throw $e;
-            }
-        }
-
-        return $products;
-    }
-
-    /**
      * storeOrderedFile
      *
      * @param  mixed  $item
@@ -422,46 +345,6 @@ class OrderRepository extends BaseRepository
                     'tracking_number' => $order_tracking_number,
                 ]);
             }
-        }
-    }
-
-    /**
-     * processRentalProduct
-     *
-     * @param  mixed  $product
-     * @param  mixed  $orderId
-     * @return void
-     */
-    protected function processRentalProduct($product, $orderId)
-    {
-        $product['from'] = Carbon::parse($product['from']);
-        $product['to'] = Carbon::parse($product['to']);
-        $product['booking_duration'] = $product['from']->diffAsCarbonInterval($product['to']);
-        $product['order_id'] = $orderId;
-        $product['language'] = $orderId;
-        unset($product['unit_price']);
-        unset($product['subtotal']);
-        try {
-            if ($product['variation_option_id'] === null) {
-                $productData = Product::findOrFail($product['product_id']);
-                unset($product['variation_option_id']);
-                $product['language'] = $productData->language;
-                if (TRANSLATION_ENABLED) {
-                    $this->processAllTranslatedProducts($productData, $product);
-                } else {
-                    $productData->availabilities()->create($product);
-                }
-            } else {
-                $variation_option = Variation::findOrFail($product['variation_option_id']);
-                unset($product['variation_option_id']);
-                if (TRANSLATION_ENABLED) {
-                    $this->processAllTranslatedVariations($variation_option, $product);
-                } else {
-                    $variation_option->availabilities()->create($product);
-                }
-            }
-        } catch (\Throwable $th) {
-            throw new ModelNotFoundException(NOT_FOUND);
         }
     }
 
@@ -570,5 +453,125 @@ class OrderRepository extends BaseRepository
         $useMustVerifyLicense = isset($settings->options['app_settings']['trust']) ? $settings->options['app_settings']['trust'] : false;
 
         return $useMustVerifyLicense;
+    }
+
+    /**
+     * @return array|LengthAwarePaginator|Collection|mixed
+     */
+    protected function createOrder($request)
+    {
+        try {
+            $orderInput = $request->only($this->dataArray);
+            $order = $this->create($orderInput);
+            $products = $this->processProducts($request['products'], $request['customer_id'], $order);
+            $order->products()->attach($products);
+            $this->createChildOrder($order->id, $request);
+            //  $this->calculateShopIncome($order);
+            $invoiceData = $this->createInvoiceDataForEmail($request, $order);
+            $customer = $request->user() ?? null;
+            event(new OrderCreated($order, $invoiceData, $customer));
+
+            return $order;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * calculateShopIncome
+     *
+     * @param  mixed  $parent_order
+     * @return void
+     */
+    protected function calculateShopIncome($parent_order)
+    {
+        foreach ($parent_order->children as $order) {
+            $balance = Balance::where('shop_id', '=', $order->shop_id)->first();
+            $adminCommissionRate = $balance->admin_commission_rate;
+            $shop_earnings = ($order->total * (100 - $adminCommissionRate)) / 100;
+            $balance->total_earnings += $shop_earnings;
+            $balance->current_balance += $shop_earnings;
+            $balance->save();
+        }
+    }
+
+    /**
+     * processProducts
+     *
+     * @param  mixed  $products
+     * @param  mixed  $customer_id
+     * @param  mixed  $order
+     * @return void
+     */
+    protected function processProducts($products, $customer_id, $order)
+    {
+        foreach ($products as $key => $product) {
+            if (! isset($product['variation_option_id'])) {
+                $product['variation_option_id'] = null;
+                $products[$key] = $product;
+            }
+            try {
+                if ($order->parent_id === null) {
+                    $productData = Product::with('digital_file')->findOrFail($product['product_id']);
+
+                    // if rental product
+                    $isRentalProduct = $productData->is_rental;
+                    if ($isRentalProduct) {
+                        $this->processRentalProduct($product, $order->id);
+                    }
+
+                    if ($productData->product_type === ProductType::Simple->value) {
+                        $this->storeOrderedFile($productData, $product['order_quantity'], $customer_id, $order->tracking_number);
+                    } elseif ($productData->product_type === ProductType::Variable->value) {
+                        $variation_option = Variation::with('digital_file')->findOrFail($product['variation_option_id']);
+                        $this->storeOrderedFile($variation_option, $product['order_quantity'], $customer_id, $order->tracking_number);
+                    }
+                }
+            } catch (Exception $e) {
+                throw $e;
+            }
+        }
+
+        return $products;
+    }
+
+    /**
+     * processRentalProduct
+     *
+     * @param  mixed  $product
+     * @param  mixed  $orderId
+     * @return void
+     */
+    protected function processRentalProduct($product, $orderId)
+    {
+        $product['from'] = Carbon::parse($product['from']);
+        $product['to'] = Carbon::parse($product['to']);
+        $product['booking_duration'] = $product['from']->diffAsCarbonInterval($product['to']);
+        $product['order_id'] = $orderId;
+        $product['language'] = $orderId;
+        unset($product['unit_price']);
+        unset($product['subtotal']);
+        try {
+            if ($product['variation_option_id'] === null) {
+                $productData = Product::findOrFail($product['product_id']);
+                unset($product['variation_option_id']);
+                $product['language'] = $productData->language;
+                if (TRANSLATION_ENABLED) {
+                    $this->processAllTranslatedProducts($productData, $product);
+                } else {
+                    $productData->availabilities()->create($product);
+                }
+            } else {
+                $variation_option = Variation::findOrFail($product['variation_option_id']);
+                unset($product['variation_option_id']);
+                if (TRANSLATION_ENABLED) {
+                    $this->processAllTranslatedVariations($variation_option, $product);
+                } else {
+                    $variation_option->availabilities()->create($product);
+                }
+            }
+        } catch (Throwable $th) {
+            throw new ModelNotFoundException(NOT_FOUND);
+        }
     }
 }

@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Traits;
 
 use Modules\Ecommerce\Enums\PaymentGatewayType;
 use Modules\Ecommerce\Enums\PaymentStatus;
 use Modules\Order\Enums\OrderStatus as OrderStatusEnum;
+use Throwable;
 
 trait OrderManagementTrait
 {
@@ -24,9 +27,9 @@ trait OrderManagementTrait
         $new_order_status = $order->order_status;
 
         if ($prev_order_status !== $new_order_status) {
-            $payment_gateway_type = isset($order->payment_gateway) ? $order->payment_gateway : PaymentGatewayType::CASH_ON_DELIVERY;
-            $usedPaymentGateway = ! in_array($payment_gateway_type, [PaymentGatewayType::CASH, PaymentGatewayType::CASH_ON_DELIVERY]);
-            $isPaymentSuccess = $order->payment_status === PaymentStatus::SUCCESS;
+            $payment_gateway_type = isset($order->payment_gateway) ? $order->payment_gateway : PaymentGatewayType::CashOnDelivery->value;
+            $usedPaymentGateway = ! in_array($payment_gateway_type, [PaymentGatewayType::Cash->value, PaymentGatewayType::CashOnDelivery->value]);
+            $isPaymentSuccess = $order->payment_status === PaymentStatus::Success->value;
             if ($usedPaymentGateway) {
                 if ($isPaymentSuccess) {
                     $this->manageVendorBalance($order, $new_order_status, $prev_order_status);
@@ -43,7 +46,7 @@ trait OrderManagementTrait
 
         try {
             $children = json_decode($order->children);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $children = $order->children;
         }
         if (is_array($children) && count($children) && $order->order_status === OrderStatusEnum::CANCELLED) {

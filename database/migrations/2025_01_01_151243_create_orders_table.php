@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Modules\Order\Enums\OrderLegacyStatus;
 
-return new class () extends Migration {
+return new class() extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -14,7 +18,10 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
 
             $table->string('order_number')->unique();
-            $table->enum('status', ['pending', 'processing', 'completed', 'failed', 'canceled', 'refunded'])->default('pending');
+            $table->enum(
+                'status',
+                OrderLegacyStatus::cases()
+            )->default(OrderLegacyStatus::Pending->value);
             $table->foreignUuid('customer_id')->constrained('users')->cascadeOnDelete();
             $table->decimal('total_amount', 10, 2);
 

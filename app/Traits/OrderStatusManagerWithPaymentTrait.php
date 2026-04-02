@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Traits;
 
+use Exception;
 use Modules\Order\Enums\OrderStatus;
 use Modules\Order\Events\OrderCancelled;
 use Modules\Order\Events\OrderStatusChanged;
@@ -27,11 +30,11 @@ trait OrderStatusManagerWithPaymentTrait
     public function manageVendorBalance($order, $order_status, $prev_order_status)
     {
         // check if new status is completed then add balance to vendor
-        if ($order_status === OrderStatus::COMPLETED) {
+        if ($order_status === OrderStatus::Completed->value) {
             $this->checkIfChildOrder($order, 'add');
         }
         // check if previous status was completed then we need to deduct the amount from vendor balance
-        elseif ($prev_order_status === OrderStatus::COMPLETED) {
+        elseif ($prev_order_status === OrderStatus::Completed->value) {
             $this->checkIfChildOrder($order, 'deduct');
         }
     }
@@ -49,7 +52,7 @@ trait OrderStatusManagerWithPaymentTrait
         if ($order->parent_id) {
             $parent_order = Order::find($order->parent_id);
             // check if parent order is mark completed then add vendor balance or continue
-            if ($parent_order->order_status === OrderStatus::COMPLETED) {
+            if ($parent_order->order_status === OrderStatus::Completed->value) {
                 $this->updateBalanceShop($order, $type);
             }
         } else {
@@ -57,57 +60,9 @@ trait OrderStatusManagerWithPaymentTrait
             $child_orders = $order->children;
             if ($child_orders->count() > 0) {
                 foreach ($child_orders as $child_order) {
-                    if ($child_order->order_status === OrderStatus::COMPLETED) {
+                    if ($child_order->order_status === OrderStatus::Completed->value) {
                         $this->updateBalanceShop($child_order, $type);
                     }
-                }
-            }
-        }
-    }
-
-    /**
-     * updateBalanceShop
-     *
-     * @param  mixed  $order
-     * @return void
-     */
-    protected function updateBalanceShop($order, $action_type = 'add')
-    {
-        $balance = Balance::where('shop_id', '=', $order->shop_id)->first();
-        $settings = Settings::getData();
-        $isMultiCommissionRate = $settings['options']['isMultiCommissionRate'];
-        $total_earnings = $balance->total_earnings;
-        $adminCommissionDefaultRate = $this->getCommissionRate($total_earnings);
-        $adminCommissionCustomRate = $balance->admin_commission_rate;
-        if ($isMultiCommissionRate) {
-            if (! $balance->is_custom_commission) {
-                $shop_earnings = ($order->total * (100 - $adminCommissionDefaultRate)) / 100;
-                // $balance->admin_commission_rate = $adminCommissionDefaultRate;
-            } else {
-                $shop_earnings = ($order->total * (100 - $adminCommissionCustomRate)) / 100;
-            }
-        } else {
-            $shop_earnings = ($order->total * (100 - $adminCommissionCustomRate)) / 100;
-        }
-
-        if ($action_type == 'deduct') {
-            $shop_earnings *= -1;
-        }
-        $balance->total_earnings += $shop_earnings;
-
-        if ($isMultiCommissionRate) {
-            if (! $balance->is_custom_commission) {
-                $updateAdminCommissionRate = $this->getCommissionRate($balance->total_earnings);
-                $balance->admin_commission_rate = $updateAdminCommissionRate;
-            }
-        }
-
-        $balance->current_balance += $shop_earnings;
-        $balance->save();
-        if ($isMultiCommissionRate) {
-            if (! $balance->is_custom_commission) {
-                if ($adminCommissionDefaultRate != $updateAdminCommissionRate) {
-                    event(new CommissionRateUpdateEvent($order->shop, $balance));
                 }
             }
         }
@@ -137,25 +92,25 @@ trait OrderStatusManagerWithPaymentTrait
     {
 
         switch ($payment_status) {
-            case PaymentStatus::SUCCESS:
+            case PaymentStatus::Success->value:
                 event(new PaymentSuccess($order));
                 break;
-            case PaymentStatus::FAILED:
+            case PaymentStatus::Failed->value:
                 event(new PaymentFailed($order));
                 break;
-            case PaymentStatus::REVERSAL:
+            case PaymentStatus::Reversal->value:
                 event(new PaymentFailed($order));
                 break;
-            case PaymentStatus::PENDING:
+            case PaymentStatus::Pending->value:
                 // code...
                 // send notification to user about order is pending.
                 break;
-            case PaymentStatus::PROCESSING:
+            case PaymentStatus::Processing->value:
                 // code...
                 // send notification to user about order is processing.
                 break;
 
-            case PaymentStatus::AWAITING_FOR_APPROVAL:
+            case PaymentStatus::AwaitingForApproval->value:
                 // code...
                 // send notification to user about order is pending & payment is waiting for approval.
                 break;
@@ -174,21 +129,21 @@ trait OrderStatusManagerWithPaymentTrait
     public function orderStatusManagementOnCOD($order, $prev_status, $new_status)
     {
         switch ($new_status) {
-            case OrderStatus::CANCELLED:
+            case OrderStatus::Cancelled->value:
                 // code...
                 $this->orderStatusManagementOnCancelled($order);
                 event(new OrderCancelled($order));
                 break;
 
-            case OrderStatus::REFUNDED:
+            case OrderStatus::Refunded->value:
                 // code...
                 event(new OrderCancelled($order));
                 break;
 
-            case OrderStatus::FAILED:
+            case OrderStatus::Failed->value:
                 // code...
                 break;
-            case OrderStatus::PROCESSING:
+            case OrderStatus::Processing->value:
                 // do nothing
                 // this event already has been fired from OrderRepository
                 break;
@@ -201,18 +156,18 @@ trait OrderStatusManagerWithPaymentTrait
     public function fireEventOnOrderStatus($order, $currentStatus)
     {
         switch ($currentStatus) {
-            case OrderStatus::CANCELLED:
+            case OrderStatus::Cancelled->value:
                 // code...
                 $this->orderStatusManagementOnCancelled($order);
                 event(new OrderCancelled($order));
                 break;
 
-            case OrderStatus::REFUNDED:
+            case OrderStatus::Refunded->value:
                 $this->orderStatusManagementOnCancelled($order);
                 event(new OrderCancelled($order));
                 break;
 
-            case OrderStatus::FAILED:
+            case OrderStatus::Failed->value:
                 $this->orderStatusManagementOnCancelled($order);
                 event(new OrderCancelled($order));
                 break;
@@ -240,7 +195,7 @@ trait OrderStatusManagerWithPaymentTrait
             }
 
             return $order_exists;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
     }
@@ -284,7 +239,7 @@ trait OrderStatusManagerWithPaymentTrait
             $parent_order->cancelled_amount = $parent_order->cancelled_amount + $order->amount + ($order->amount * $tax_rate) / 1000000;
             $parent_order->save();
             // TODO: give refund to customer if order is pre paid
-            if ($parent_order->paid_total == 0) {
+            if ($parent_order->paid_total === 0) {
                 $parent_order->cancelled_delivery_fee = $parent_order->delivery_fee;
                 $parent_order->delivery_fee = 0;
                 $parent_order->sales_tax = 0;
@@ -299,7 +254,7 @@ trait OrderStatusManagerWithPaymentTrait
         } else {
             $childOrders = $parent_order->children;
             foreach ($childOrders as $childOrder) {
-                if ($childOrder->order_status == OrderStatus::CANCELLED) {
+                if ($childOrder->order_status === OrderStatus::Cancelled->value) {
                     continue;
                 }
                 $childOrder->cancelled_amount = $childOrder->total;
@@ -328,8 +283,56 @@ trait OrderStatusManagerWithPaymentTrait
      */
     public function checkOrderStatusIsFinal(Order $order): bool
     {
-        $orderStatuses = [OrderStatus::COMPLETED, OrderStatus::CANCELLED, OrderStatus::REFUNDED];
+        $orderStatuses = [OrderStatus::Completed->value, OrderStatus::Cancelled->value, OrderStatus::Refunded->value];
 
         return in_array($order->order_status, $orderStatuses);
+    }
+
+    /**
+     * updateBalanceShop
+     *
+     * @param  mixed  $order
+     * @return void
+     */
+    protected function updateBalanceShop($order, $action_type = 'add')
+    {
+        $balance = Balance::where('shop_id', '=', $order->shop_id)->first();
+        $settings = Settings::getData();
+        $isMultiCommissionRate = $settings['options']['isMultiCommissionRate'];
+        $total_earnings = $balance->total_earnings;
+        $adminCommissionDefaultRate = $this->getCommissionRate($total_earnings);
+        $adminCommissionCustomRate = $balance->admin_commission_rate;
+        if ($isMultiCommissionRate) {
+            if (! $balance->is_custom_commission) {
+                $shop_earnings = ($order->total * (100 - $adminCommissionDefaultRate)) / 100;
+                // $balance->admin_commission_rate = $adminCommissionDefaultRate;
+            } else {
+                $shop_earnings = ($order->total * (100 - $adminCommissionCustomRate)) / 100;
+            }
+        } else {
+            $shop_earnings = ($order->total * (100 - $adminCommissionCustomRate)) / 100;
+        }
+
+        if ($action_type === 'deduct') {
+            $shop_earnings *= -1;
+        }
+        $balance->total_earnings += $shop_earnings;
+
+        if ($isMultiCommissionRate) {
+            if (! $balance->is_custom_commission) {
+                $updateAdminCommissionRate = $this->getCommissionRate($balance->total_earnings);
+                $balance->admin_commission_rate = $updateAdminCommissionRate;
+            }
+        }
+
+        $balance->current_balance += $shop_earnings;
+        $balance->save();
+        if ($isMultiCommissionRate) {
+            if (! $balance->is_custom_commission) {
+                if ($adminCommissionDefaultRate !== $updateAdminCommissionRate) {
+                    event(new CommissionRateUpdateEvent($order->shop, $balance));
+                }
+            }
+        }
     }
 }

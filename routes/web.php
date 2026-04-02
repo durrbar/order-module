@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Facades\Route;
 use Modules\Order\Http\Controllers\CheckoutController;
 use Modules\Order\Http\Controllers\DownloadController;
@@ -32,7 +34,6 @@ Route::post('orders/payment', [OrderController::class, 'submitPayment']);
 
 Route::post('orders/checkout/verify', [CheckoutController::class, 'verify']);
 
-
 Route::get('download_url/token/{token}', [DownloadController::class, 'downloadFile'])->name('download_url.token');
 
 /**
@@ -40,7 +41,7 @@ Route::get('download_url/token/{token}', [DownloadController::class, 'downloadFi
  * Authorized Route for Customers only
  * ******************************************
  */
-Route::group(['middleware' => ['can:'.Permission::CUSTOMER, 'auth:sanctum', 'email.verified']], function (): void {
+Route::group(['middleware' => ['can:'.Permission::Customer->value, 'auth:sanctum', 'email.verified']], function (): void {
     Route::apiResource('orders', OrderController::class, [
         'only' => ['index'],
     ]);
@@ -56,7 +57,7 @@ Route::group(['middleware' => ['can:'.Permission::CUSTOMER, 'auth:sanctum', 'ema
  * ******************************************
  */
 Route::group(
-    ['middleware' => ['permission:'.Permission::STAFF.'|'.Permission::STORE_OWNER, 'auth:sanctum', 'email.verified']],
+    ['middleware' => ['permission:'.Permission::Staff->value.'|'.Permission::StoreOwner->value, 'auth:sanctum', 'email.verified']],
     function (): void {
         Route::apiResource('orders', OrderController::class, [
             'only' => ['update', 'destroy'],
@@ -72,7 +73,7 @@ Route::group(
  * Authorized Route for Super Admin only
  * *****************************************
  */
-Route::group(['middleware' => ['permission:'.Permission::SUPER_ADMIN, 'auth:sanctum']], function (): void {
+Route::group(['middleware' => ['permission:'.Permission::SuperAdmin->value, 'auth:sanctum']], function (): void {
     // Route::apiResource('order-status', OrderStatusController::class, [
     //     'only' => ['store', 'update', 'destroy'],
     // ]);

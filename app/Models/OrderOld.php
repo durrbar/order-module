@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Modules\Address\Models\Address;
 use Modules\Order\Observers\OrderObserver;
 
@@ -63,30 +64,24 @@ class OrderOld extends Model
 
     /**
      * Get all physical items in the order.
-     *
-     * @return Collection
      */
-    public function getPhysicalItems()
+    public function getPhysicalItems(): Collection
     {
         return $this->items()->where('type', 'physical')->get();
     }
 
     /**
      * Get all digital items in the order.
-     *
-     * @return Collection
      */
-    public function getDigitalItems()
+    public function getDigitalItems(): Collection
     {
         return $this->items()->where('type', 'digital')->get();
     }
 
     /**
      * Get all service items in the order.
-     *
-     * @return Collection
      */
-    public function getServiceItems()
+    public function getServiceItems(): Collection
     {
         return $this->items()->where('type', 'service')->get();
     }
@@ -102,7 +97,7 @@ class OrderOld extends Model
     /**
      * MorphToMany relationship to addresses.
      */
-    public function addresses()
+    public function addresses(): MorphToMany
     {
         return $this->morphToMany(Address::class, 'addressable')
             ->withPivot('type'); // Include the 'type' column from the pivot table
@@ -111,7 +106,7 @@ class OrderOld extends Model
     /**
      * Get the billing address for the order.
      */
-    public function billingAddress()
+    public function billingAddress(): ?Address
     {
         return $this->addresses()->wherePivot('type', 'billing')->first();
     }
@@ -119,7 +114,7 @@ class OrderOld extends Model
     /**
      * Get the shipping address for the order.
      */
-    public function shippingAddress()
+    public function shippingAddress(): ?Address
     {
         return $this->addresses()->wherePivot('type', 'shipping')->first();
     }
@@ -127,7 +122,7 @@ class OrderOld extends Model
     /**
      * Check if the order has a billing address.
      */
-    public function hasBillingAddress()
+    public function hasBillingAddress(): bool
     {
         return $this->addresses()->wherePivot('type', 'billing')->exists();
     }
@@ -135,7 +130,7 @@ class OrderOld extends Model
     /**
      * Check if the order has a shipping address.
      */
-    public function hasShippingAddress()
+    public function hasShippingAddress(): bool
     {
         return $this->addresses()->wherePivot('type', 'shipping')->exists();
     }

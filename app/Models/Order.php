@@ -2,7 +2,7 @@
 
 namespace Modules\Order\Models;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,12 +12,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Coupon\Models\Coupon;
 use Modules\Ecommerce\Models\Product;
 use Modules\Ecommerce\Traits\TranslationTrait;
+use Modules\Order\Models\Scopes\OrderByCreatedAtDescScope;
 use Modules\Payment\Models\PaymentIntent;
 use Modules\Refund\Models\Refund;
 use Modules\Review\Models\Review;
 use Modules\User\Models\User;
 use Modules\Vendor\Models\Shop;
 
+#[ScopedBy([OrderByCreatedAtDescScope::class])]
 class Order extends Model
 {
     use HasUuids;
@@ -39,15 +41,6 @@ class Order extends Model
         'updated_at',
         'deleted_at',
     ];
-
-    protected static function boot()
-    {
-        parent::boot();
-        // Order by created_at desc
-        static::addGlobalScope('order', function (Builder $builder): void {
-            $builder->orderBy('created_at', 'desc');
-        });
-    }
 
     protected $with = ['customer', 'products.variation_options'];
 

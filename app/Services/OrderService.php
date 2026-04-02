@@ -129,8 +129,8 @@ class OrderService
         // Sync the order status with the invoice and delivery statuses
         $invoicePaid = $invoiceStatus === InvoicePaymentStatus::Paid->value;
         $invoiceFailed = $invoiceStatus === InvoicePaymentStatus::Failed->value;
-        $deliveryCompleted = in_array($deliveryStatus, ['completed', DeliveryStatus::Delivered->value], true);
-        $deliveryFailed = $deliveryStatus === DeliveryStatus::Failed->value || $deliveryStatus === 'failed';
+        $deliveryCompleted = in_array($deliveryStatus, [OrderLegacyStatus::Completed->value, DeliveryStatus::Delivered->value], true);
+        $deliveryFailed = $deliveryStatus === DeliveryStatus::Failed->value || $deliveryStatus === OrderLegacyStatus::Failed->value;
 
         if ($invoicePaid && $deliveryCompleted) {
             $order->update(['status' => OrderLegacyStatus::Completed->value]);

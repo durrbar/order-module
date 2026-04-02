@@ -10,7 +10,7 @@ use Modules\Order\Events\OrderCreatedEvent;
 use Modules\Order\Events\OrderPaidEvent;
 use Modules\Order\Models\Order;
 
-final class OrderObserver
+class OrderObserver
 {
     /**
      * Handle the Order "created" event.

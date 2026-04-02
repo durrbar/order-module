@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Listeners;
 
 use Modules\Order\Events\OrderCreatedEvent;
@@ -7,7 +9,7 @@ use Modules\Order\Services\OrderHistoryService;
 
 class OrderCreatedListener
 {
-    protected OrderHistoryService $orderHistoryService;
+    private OrderHistoryService $orderHistoryService;
 
     public function __construct(OrderHistoryService $orderHistoryService)
     {

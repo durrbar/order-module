@@ -42,7 +42,7 @@ use Prettus\Repository\Criteria\RequestCriteria;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Throwable;
 
-final class OrderRepository extends BaseRepository
+class OrderRepository extends BaseRepository
 {
     use CalculatePaymentTrait;
     use OrderManagementTrait;

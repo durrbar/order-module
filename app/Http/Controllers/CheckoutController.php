@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Http\Controllers;
 
 use Modules\Core\Exceptions\DurrbarException;

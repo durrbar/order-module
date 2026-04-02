@@ -13,7 +13,7 @@ use Modules\Order\Models\Order;
 use Modules\Order\Services\OrderService;
 use Tests\TestCase;
 
-final class OrderServiceTest extends TestCase
+class OrderServiceTest extends TestCase
 {
     use MockeryPHPUnitIntegration;
 

@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,15 +19,11 @@ use Modules\Order\Observers\OrderObserver;
 // use Modules\Order\Database\Factories\OrderFactory;
 
 #[ObservedBy([OrderObserver::class])]
+#[Fillable([])]
 class OrderOld extends Model
 {
     use HasFactory;
     use HasUuids;
-
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
 
     // protected static function newFactory(): OrderFactory
     // {
@@ -64,7 +64,7 @@ class OrderOld extends Model
     /**
      * Get all physical items in the order.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getPhysicalItems()
     {
@@ -74,7 +74,7 @@ class OrderOld extends Model
     /**
      * Get all digital items in the order.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getDigitalItems()
     {
@@ -84,7 +84,7 @@ class OrderOld extends Model
     /**
      * Get all service items in the order.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getServiceItems()
     {

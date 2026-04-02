@@ -34,7 +34,7 @@ use Modules\Settings\Models\Settings;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-final class OrderController extends CoreController
+class OrderController extends CoreController
 {
     use OrderManagementTrait;
     use PaymentStatusManagerWithOrderTrait;

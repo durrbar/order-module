@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Repositories;
 
 use Exception;
@@ -13,6 +15,7 @@ use Modules\Settings\Models\Settings;
 use Modules\Tax\Models\Tax;
 use Modules\User\Models\User;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Throwable;
 
 class CheckoutRepository
 {
@@ -23,7 +26,7 @@ class CheckoutRepository
         if ($request['customer_id']) {
             try {
                 $user = User::findOrFail($request->customer_id);
-            } catch (\Throwable $th) {
+            } catch (Throwable $th) {
                 throw new ModelNotFoundException(NOT_FOUND);
             }
         } else {
@@ -95,12 +98,30 @@ class CheckoutRepository
                 $shipping_class = Shipping::find($class_id);
 
                 return $this->getShippingCharge($shipping_class, $amount);
-            } else {
-                return $this->calculateShippingChargeByProduct($request['products']);
             }
-        } catch (\Throwable $th) {
+
+            return $this->calculateShippingChargeByProduct($request['products']);
+
+        } catch (Throwable $th) {
             return 0;
         }
+    }
+
+    public function checkStock($products)
+    {
+        $unavailable_products = [];
+        foreach ($products as $product) {
+            if (isset($product['variation_option_id'])) {
+                $is_not_in_stock = $this->isVariationInStock($product['variation_option_id'], $product['order_quantity']);
+            } else {
+                $is_not_in_stock = $this->isInStock($product['product_id'], $product['order_quantity']);
+            }
+            if ($is_not_in_stock) {
+                $unavailable_products[] = $is_not_in_stock;
+            }
+        }
+
+        return $unavailable_products;
     }
 
     protected function calculateShippingChargeByProduct($products)
@@ -121,23 +142,6 @@ class CheckoutRepository
         }
 
         return 0;
-    }
-
-    public function checkStock($products)
-    {
-        $unavailable_products = [];
-        foreach ($products as $product) {
-            if (isset($product['variation_option_id'])) {
-                $is_not_in_stock = $this->isVariationInStock($product['variation_option_id'], $product['order_quantity']);
-            } else {
-                $is_not_in_stock = $this->isInStock($product['product_id'], $product['order_quantity']);
-            }
-            if ($is_not_in_stock) {
-                $unavailable_products[] = $is_not_in_stock;
-            }
-        }
-
-        return $unavailable_products;
     }
 
     protected function isInStock($id, $order_quantity)
@@ -191,7 +195,7 @@ class CheckoutRepository
             $tax_class = $settings['options']['taxClass'];
 
             return Tax::findOrFail($tax_class);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             return 0;
         }
 

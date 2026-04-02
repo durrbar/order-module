@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Http\Requests;
 
 use Illuminate\Contracts\Validation\Validator;
@@ -9,22 +11,6 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 class CheckoutVerifyRequest extends FormRequest
 {
     protected $rules = [];
-
-    /**
-     * General validation rules
-     *
-     * @return array
-     */
-    protected function getRules()
-    {
-        return [
-            'amount' => 'required|numeric',
-            'customer_id' => 'nullable|exists:Modules\User\Models\User,id',
-            'products' => 'required|array',
-            'billing_address' => 'array',
-            'shipping_address' => 'array',
-        ];
-    }
 
     /**
      * Determine if the user is authorized to make this request.
@@ -61,5 +47,21 @@ class CheckoutVerifyRequest extends FormRequest
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json($validator->errors(), 422));
+    }
+
+    /**
+     * General validation rules
+     *
+     * @return array
+     */
+    protected function getRules()
+    {
+        return [
+            'amount' => 'required|numeric',
+            'customer_id' => 'nullable|exists:Modules\User\Models\User,id',
+            'products' => 'required|array',
+            'billing_address' => 'array',
+            'shipping_address' => 'array',
+        ];
     }
 }

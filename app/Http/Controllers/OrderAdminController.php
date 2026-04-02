@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -60,7 +63,7 @@ class OrderAdminController extends Controller
 
             $order = $this->orderService->createOrder($orderData);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->handleError(self::ERROR_CREATE.': '.$e->getMessage(), $request);
         }
     }

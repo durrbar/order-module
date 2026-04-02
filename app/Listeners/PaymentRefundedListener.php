@@ -8,7 +8,7 @@ use Modules\Order\Enums\OrderLegacyStatus;
 use Modules\Order\Services\OrderService;
 use Modules\Payment\Events\PaymentRefundedEvent;
 
-final class PaymentRefundedListener
+class PaymentRefundedListener
 {
     private OrderService $orderService;
 

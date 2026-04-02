@@ -9,7 +9,7 @@ use Modules\Order\Services\OrderHistoryService;
 use Modules\Order\Services\OrderService;
 use Modules\Payment\Events\PaymentSuccessEvent;
 
-final class PaymentSuccessListener
+class PaymentSuccessListener
 {
     private OrderService $orderService;
 

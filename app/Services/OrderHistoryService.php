@@ -1,7 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Services;
 
+use DateTime;
+use Exception;
+use InvalidArgumentException;
 use Modules\Order\Models\Order;
 use Modules\Order\Models\OrderHistory;
 
@@ -26,14 +31,14 @@ class OrderHistoryService
     /**
      * Update order history timeline with new events.
      *
-     * @param  \DateTime|string|null  $time
+     * @param  DateTime|string|null  $time
      */
     public function addTimelineEvent(Order $order, string $title, $time = null): void
     {
         $history = $order->history;
 
         if (! $history) {
-            throw new \Exception('Order history not found.');
+            throw new Exception('Order history not found.');
         }
 
         $timeline = $history->timeline ?? [];
@@ -51,18 +56,18 @@ class OrderHistoryService
     /**
      * Update specific timestamps in the order history.
      *
-     * @param  \DateTime|string|null  $time
+     * @param  DateTime|string|null  $time
      */
     public function updateTimestamp(Order $order, string $field, $time = null): void
     {
         $history = $order->history;
 
         if (! $history) {
-            throw new \Exception('Order history not found.');
+            throw new Exception('Order history not found.');
         }
 
         if (! in_array($field, ['order_time', 'payment_time', 'delivery_time', 'completion_time'])) {
-            throw new \Exception("Invalid timestamp field: $field");
+            throw new Exception("Invalid timestamp field: $field");
         }
 
         $history->update([$field => $time ?? now()]);
@@ -71,7 +76,7 @@ class OrderHistoryService
     private function validateTimelineEntry(array $entry): void
     {
         if (! isset($entry['title']) || ! isset($entry['time'])) {
-            throw new \InvalidArgumentException('Invalid timeline entry: Missing "title" or "time".');
+            throw new InvalidArgumentException('Invalid timeline entry: Missing "title" or "time".');
         }
     }
 }

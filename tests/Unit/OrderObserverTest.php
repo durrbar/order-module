@@ -12,7 +12,7 @@ use Modules\Order\Models\Order;
 use Modules\Order\Observers\OrderObserver;
 use Tests\TestCase;
 
-final class OrderObserverTest extends TestCase
+class OrderObserverTest extends TestCase
 {
     public function test_updated_dispatches_paid_event_for_paid_status(): void
     {

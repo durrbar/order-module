@@ -10,7 +10,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rules\Enum;
 use Modules\Order\Enums\OrderStatus;
 
-final class OrderUpdateRequest extends FormRequest
+class OrderUpdateRequest extends FormRequest
 {
     protected $rules = [];
 

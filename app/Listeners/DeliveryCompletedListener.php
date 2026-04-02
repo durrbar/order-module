@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Order\Listeners;
 
 use Modules\Delivery\Events\DeliveryCompletedEvent;
@@ -8,9 +10,9 @@ use Modules\Order\Services\OrderService;
 
 class DeliveryCompletedListener
 {
-    protected OrderService $orderService;
+    private OrderService $orderService;
 
-    protected OrderHistoryService $orderHistoryService;
+    private OrderHistoryService $orderHistoryService;
 
     /**
      * Create the event listener.

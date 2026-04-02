@@ -87,7 +87,7 @@ class OrderRepository extends BaseRepository
         'note',
     ];
 
-    public function boot()
+    public function boot(): void
     {
         try {
             $this->pushCriteria(app(RequestCriteria::class));
@@ -99,7 +99,7 @@ class OrderRepository extends BaseRepository
     /**
      * Configure the Model
      **/
-    public function model()
+    public function model(): string
     {
         return Order::class;
     }

@@ -25,7 +25,6 @@ trait OrderStatusManagerWithPaymentTrait
      * @param  mixed  $order
      * @param  mixed  $order_status
      * @param  mixed  $payment_status
-     * @return void
      */
     public function manageVendorBalance($order, $order_status, $prev_order_status)
     {
@@ -44,7 +43,6 @@ trait OrderStatusManagerWithPaymentTrait
      *
      * @param  mixed  $order
      * @param  mixed  $type
-     * @return void
      */
     public function checkIfChildOrder($order, $type)
     {
@@ -86,7 +84,6 @@ trait OrderStatusManagerWithPaymentTrait
      * @param  mixed  $order
      * @param  mixed  $order_status
      * @param  mixed  $payment_status
-     * @return void
      */
     public function orderStatusManagementOnPayment($order, $order_status, $payment_status)
     {
@@ -124,7 +121,6 @@ trait OrderStatusManagerWithPaymentTrait
      * @param  mixed  $order
      * @param  string  $prev_status
      * @param  string  $new_status
-     * @return void
      */
     public function orderStatusManagementOnCOD($order, $prev_status, $new_status)
     {
@@ -204,7 +200,6 @@ trait OrderStatusManagerWithPaymentTrait
      * orderStatusManagementOnCancelled
      *
      * @param  mixed  $order
-     * @return void
      */
     public function orderStatusManagementOnCancelled($order)
     {
@@ -292,7 +287,6 @@ trait OrderStatusManagerWithPaymentTrait
      * updateBalanceShop
      *
      * @param  mixed  $order
-     * @return void
      */
     protected function updateBalanceShop($order, $action_type = 'add')
     {

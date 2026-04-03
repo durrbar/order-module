@@ -166,7 +166,6 @@ class OrderController extends CoreController
      * fetchSingleOrder
      *
      * @param  mixed  $request
-     * @return void
      *
      * @throws DurrbarException
      */
@@ -216,7 +215,6 @@ class OrderController extends CoreController
      *
      * @param  mixed  $request
      * @param  mixed  $tracking_number
-     * @return void
      */
     public function findByTrackingNumber(Request $request, $tracking_number)
     {
@@ -306,7 +304,6 @@ class OrderController extends CoreController
      * Export order to excel sheet
      *
      * @param  string  $token
-     * @return void
      */
     public function exportOrder($token)
     {
@@ -375,7 +372,6 @@ class OrderController extends CoreController
      * Export order to excel sheet
      *
      * @param  string  $token
-     * @return void
      */
     public function downloadInvoice($token)
     {

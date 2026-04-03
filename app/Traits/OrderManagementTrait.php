@@ -18,7 +18,6 @@ trait OrderManagementTrait
      *
      * @param  mixed  $order
      * @param  mixed  $status
-     * @return void
      */
     public function changeOrderStatus($order, $status)
     {

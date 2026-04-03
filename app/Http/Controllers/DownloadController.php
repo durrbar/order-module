@@ -26,7 +26,6 @@ class DownloadController extends CoreController
      * fetchDownloadableFiles
      *
      * @param  mixed  $request
-     * @return void
      *
      * @throws DurrbarException
      */
@@ -65,7 +64,6 @@ class DownloadController extends CoreController
      * generateDownloadableUrl
      *
      * @param  mixed  $request
-     * @return void
      *
      * @throws DurrbarException
      */
@@ -94,7 +92,6 @@ class DownloadController extends CoreController
      * downloadFile
      *
      * @param  mixed  $token
-     * @return void
      *
      * @throws DurrbarException
      */

@@ -238,7 +238,6 @@ class OrderRepository extends BaseRepository
      * updateOrder
      *
      * @param  mixed  $request
-     * @return void
      */
     public function updateOrder($request)
     {
@@ -260,7 +259,6 @@ class OrderRepository extends BaseRepository
      *
      * @param  mixed  $amount
      * @param  mixed  $order_id
-     * @return void
      */
     public function storeOrderWalletPoint($amount, $order_id)
     {
@@ -274,7 +272,6 @@ class OrderRepository extends BaseRepository
      *
      * @param  mixed  $total
      * @param  mixed  $customer_id
-     * @return void
      */
     public function manageWalletAmount($total, $customer_id)
     {
@@ -331,7 +328,6 @@ class OrderRepository extends BaseRepository
      * @param  mixed  $item
      * @param  mixed  $order_quantity
      * @param  mixed  $customer_id
-     * @return void
      */
     public function storeOrderedFile($item, $order_quantity, $customer_id, $order_tracking_number)
     {
@@ -353,7 +349,6 @@ class OrderRepository extends BaseRepository
      *
      * @param  mixed  $product
      * @param  mixed  $orderedItem
-     * @return void
      */
     public function processAllTranslatedProducts($product, $orderedItem)
     {
@@ -370,7 +365,6 @@ class OrderRepository extends BaseRepository
      *
      * @param  mixed  $variation
      * @param  mixed  $orderedItem
-     * @return void
      */
     public function processAllTranslatedVariations($variation, $orderedItem)
     {
@@ -481,7 +475,6 @@ class OrderRepository extends BaseRepository
      * calculateShopIncome
      *
      * @param  mixed  $parent_order
-     * @return void
      */
     protected function calculateShopIncome($parent_order)
     {
@@ -501,7 +494,6 @@ class OrderRepository extends BaseRepository
      * @param  mixed  $products
      * @param  mixed  $customer_id
      * @param  mixed  $order
-     * @return void
      */
     protected function processProducts($products, $customer_id, $order)
     {
@@ -540,7 +532,6 @@ class OrderRepository extends BaseRepository
      *
      * @param  mixed  $product
      * @param  mixed  $orderId
-     * @return void
      */
     protected function processRentalProduct($product, $orderId)
     {

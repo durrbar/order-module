@@ -16,7 +16,7 @@ class PaymentSuccessListener
         private OrderHistoryService $orderHistoryService
     ) {}
 
-    public function handle(PaymentSuccessEvent $event)
+    public function handle(PaymentSuccessEvent $event): void
     {
         $this->orderHistoryService->updateTimestamp($event->payment->order, 'payment_time');
 

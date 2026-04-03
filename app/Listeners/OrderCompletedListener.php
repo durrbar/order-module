@@ -11,7 +11,7 @@ class OrderCompletedListener
 {
     public function __construct(private OrderHistoryService $orderHistoryService) {}
 
-    public function handle(OrderCompletedEvent $event)
+    public function handle(OrderCompletedEvent $event): void
     {
         $this->orderHistoryService->updateTimestamp($event->order, 'completion_time');
     }

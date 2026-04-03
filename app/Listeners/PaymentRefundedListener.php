@@ -12,7 +12,7 @@ class PaymentRefundedListener
 {
     public function __construct(private OrderService $orderService) {}
 
-    public function handle(PaymentRefundedEvent $event)
+    public function handle(PaymentRefundedEvent $event): void
     {
         // Update the associated order status to "refunded"
         $this->orderService->updateOrderStatus($event->payment->order, OrderLegacyStatus::Refunded->value);

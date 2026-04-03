@@ -11,7 +11,7 @@ class OrderCreatedListener
 {
     public function __construct(private OrderHistoryService $orderHistoryService) {}
 
-    public function handle(OrderCreatedEvent $event)
+    public function handle(OrderCreatedEvent $event): void
     {
         $order = $event->order;
 

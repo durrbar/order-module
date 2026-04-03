@@ -25,26 +25,14 @@ class OrderCreated implements ShouldBroadcast, ShouldQueue
     use SerializesModels;
     use UsersTrait;
 
-    public Order $order;
-
-    public array $invoiceData;
-
-    /**
-     * user
-     *
-     * @var User
-     */
-    public $user;
-
     /**
      * Create a new event instance.
      */
-    public function __construct(Order $order, array $invoiceData, ?User $user)
-    {
-        $this->order = $order;
-        $this->invoiceData = $invoiceData;
-        $this->user = $user;
-    }
+    public function __construct(
+        public Order $order,
+        public array $invoiceData,
+        public ?User $user
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.

@@ -9,13 +9,8 @@ use Modules\Order\Models\Order;
 
 class OrderStatusChanged implements ShouldQueue
 {
-    public Order $order;
-
     /**
      * Create a new event instance.
      */
-    public function __construct(Order $order)
-    {
-        $this->order = $order;
-    }
+    public function __construct(public Order $order) {}
 }

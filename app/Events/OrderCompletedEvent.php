@@ -11,10 +11,5 @@ class OrderCompletedEvent
 {
     use Dispatchable;
 
-    public $order;
-
-    public function __construct(Order $order)
-    {
-        $this->order = $order;
-    }
+    public function __construct(public Order $order) {}
 }

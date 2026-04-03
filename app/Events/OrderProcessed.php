@@ -10,15 +10,7 @@ use Modules\Order\Models\Order;
 class OrderProcessed implements ShouldQueue
 {
     /**
-     * @var Order
-     */
-    public $order;
-
-    /**
      * Create a new event instance.
      */
-    public function __construct(Order $order)
-    {
-        $this->order = $order;
-    }
+    public function __construct(public Order $order) {}
 }

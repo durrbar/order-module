@@ -20,12 +20,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class DownloadController extends CoreController
 {
-    public $repository;
-
-    public function __construct(DownloadRepository $repository)
-    {
-        $this->repository = $repository;
-    }
+    public function __construct(public DownloadRepository $repository) {}
 
     /**
      * fetchDownloadableFiles

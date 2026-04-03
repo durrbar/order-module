@@ -11,12 +11,7 @@ use Modules\Order\Repositories\CheckoutRepository;
 
 class CheckoutController extends CoreController
 {
-    public $repository;
-
-    public function __construct(CheckoutRepository $repository)
-    {
-        $this->repository = $repository;
-    }
+    public function __construct(public CheckoutRepository $repository) {}
 
     /**
      * Verify the checkout data and calculate tax and shipping.

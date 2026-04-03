@@ -9,8 +9,5 @@ use Modules\Order\Models\Order;
 
 class OrderReceived implements ShouldQueue
 {
-    /**
-     * Create a new event instance.
-     */
     public function __construct(public readonly Order $order) {}
 }

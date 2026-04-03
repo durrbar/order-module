@@ -20,7 +20,6 @@ class PaymentSuccessListener
     {
         $this->orderHistoryService->updateTimestamp($event->payment->order, 'payment_time');
 
-        // Update the associated order status to "processing"
         $this->orderService->updateOrderStatus($event->payment->order, OrderLegacyStatus::Processing->value);
     }
 }

@@ -25,9 +25,6 @@ class OrderCreated implements ShouldBroadcast, ShouldQueue
     use SerializesModels;
     use UsersTrait;
 
-    /**
-     * Create a new event instance.
-     */
     public function __construct(
         public Order $order,
         public array $invoiceData,
@@ -41,38 +38,36 @@ class OrderCreated implements ShouldBroadcast, ShouldQueue
      */
     public function broadcastOn(): array
     {
-        $event_channels = $shop_ids = $vendor_ids = [];
+        $eventChannels = [];
+        $shopIds = [];
+        $vendorIds = [];
 
-        // Notify in admin-end
         $admins = $this->getAdminUsers();
-        if (isset($admins)) {
+        if ($admins->isNotEmpty()) {
             foreach ($admins as $user) {
-                $channel_name = new PrivateChannel('order.created.'.$user->id);
-                $event_channels[] = $channel_name;
+                $eventChannels[] = new PrivateChannel('order.created.'.$user->id);
             }
         }
 
-        // Notify in vendor-end
         if (isset($this->order->products)) {
             foreach ($this->order->products as $product) {
-                if (! in_array($product->shop_id, $shop_ids)) {
-                    $vendor_shop = Shop::findOrFail($product->shop_id);
-                    if (! in_array($vendor_shop->owner_id, $vendor_ids)) {
-                        $vendor_ids[] = $vendor_shop->owner_id;
+                if (! in_array($product->shop_id, $shopIds, true)) {
+                    $vendorShop = Shop::findOrFail($product->shop_id);
+                    if (! in_array($vendorShop->owner_id, $vendorIds, true)) {
+                        $vendorIds[] = $vendorShop->owner_id;
                     }
-                    $shop_ids[] = $product->shop_id;
+                    $shopIds[] = $product->shop_id;
                 }
             }
         }
 
-        if (isset($vendor_ids)) {
-            foreach ($vendor_ids as $vendor_id) {
-                $channel_name = new PrivateChannel('order.created.'.$vendor_id);
-                $event_channels[] = $channel_name;
+        if ($vendorIds !== []) {
+            foreach ($vendorIds as $vendorId) {
+                $eventChannels[] = new PrivateChannel('order.created.'.$vendorId);
             }
         }
 
-        return $event_channels;
+        return $eventChannels;
     }
 
     /**
@@ -92,7 +87,6 @@ class OrderCreated implements ShouldBroadcast, ShouldQueue
      */
     public function broadcastAs(): string
     {
-        // event's name will be written here.
         return 'order.create.event';
     }
 

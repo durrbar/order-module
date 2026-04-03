@@ -14,7 +14,6 @@ class PaymentRefundedListener
 
     public function handle(PaymentRefundedEvent $event): void
     {
-        // Update the associated order status to "refunded"
         $this->orderService->updateOrderStatus($event->payment->order, OrderLegacyStatus::Refunded->value);
     }
 }

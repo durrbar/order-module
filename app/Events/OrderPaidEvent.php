@@ -11,8 +11,5 @@ class OrderPaidEvent
 {
     use Dispatchable;
 
-    /**
-     * Create a new event instance.
-     */
     public function __construct(public readonly Order $order) {}
 }

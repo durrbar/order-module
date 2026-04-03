@@ -9,7 +9,7 @@ use Modules\Order\Services\OrderHistoryService;
 
 class OrderCompletedListener
 {
-    public function __construct(private OrderHistoryService $orderHistoryService) {}
+    public function __construct(private readonly OrderHistoryService $orderHistoryService) {}
 
     public function handle(OrderCompletedEvent $event): void
     {

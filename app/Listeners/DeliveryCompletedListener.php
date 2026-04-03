@@ -14,8 +14,8 @@ class DeliveryCompletedListener
      * Create the event listener.
      */
     public function __construct(
-        private OrderService $orderService,
-        private OrderHistoryService $orderHistoryService
+        private readonly OrderService $orderService,
+        private readonly OrderHistoryService $orderHistoryService
     ) {}
 
     /**

@@ -12,8 +12,8 @@ use Modules\Payment\Events\PaymentSuccessEvent;
 class PaymentSuccessListener
 {
     public function __construct(
-        private OrderService $orderService,
-        private OrderHistoryService $orderHistoryService
+        private readonly OrderService $orderService,
+        private readonly OrderHistoryService $orderHistoryService
     ) {}
 
     public function handle(PaymentSuccessEvent $event): void

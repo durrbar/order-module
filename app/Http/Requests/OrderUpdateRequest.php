@@ -46,7 +46,7 @@ class OrderUpdateRequest extends FormRequest
      *
      * @return array
      */
-    protected function getRules()
+    protected function getRules(): array
     {
         return [
             'coupon_id' => 'nullable|exists:Modules\Ecommerce\Models\Coupon,id',

@@ -54,7 +54,7 @@ class CheckoutVerifyRequest extends FormRequest
      *
      * @return array
      */
-    protected function getRules()
+    protected function getRules(): array
     {
         return [
             'amount' => 'required|numeric',

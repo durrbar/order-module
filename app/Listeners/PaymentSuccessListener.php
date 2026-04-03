@@ -11,15 +11,10 @@ use Modules\Payment\Events\PaymentSuccessEvent;
 
 class PaymentSuccessListener
 {
-    private OrderService $orderService;
-
-    private OrderHistoryService $orderHistoryService;
-
-    public function __construct(OrderService $orderService, OrderHistoryService $orderHistoryService)
-    {
-        $this->orderService = $orderService;
-        $this->orderHistoryService = $orderHistoryService;
-    }
+    public function __construct(
+        private OrderService $orderService,
+        private OrderHistoryService $orderHistoryService
+    ) {}
 
     public function handle(PaymentSuccessEvent $event)
     {

@@ -10,18 +10,13 @@ use Modules\Order\Services\OrderService;
 
 class DeliveryCompletedListener
 {
-    private OrderService $orderService;
-
-    private OrderHistoryService $orderHistoryService;
-
     /**
      * Create the event listener.
      */
-    public function __construct(OrderService $orderService, OrderHistoryService $orderHistoryService)
-    {
-        $this->orderHistoryService = $orderHistoryService;
-        $this->orderService = $orderService;
-    }
+    public function __construct(
+        private OrderService $orderService,
+        private OrderHistoryService $orderHistoryService
+    ) {}
 
     /**
      * Handle the event.

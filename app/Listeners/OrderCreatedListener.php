@@ -9,12 +9,7 @@ use Modules\Order\Services\OrderHistoryService;
 
 class OrderCreatedListener
 {
-    private OrderHistoryService $orderHistoryService;
-
-    public function __construct(OrderHistoryService $orderHistoryService)
-    {
-        $this->orderHistoryService = $orderHistoryService;
-    }
+    public function __construct(private OrderHistoryService $orderHistoryService) {}
 
     public function handle(OrderCreatedEvent $event)
     {

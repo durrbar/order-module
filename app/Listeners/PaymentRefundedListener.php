@@ -10,12 +10,7 @@ use Modules\Payment\Events\PaymentRefundedEvent;
 
 class PaymentRefundedListener
 {
-    private OrderService $orderService;
-
-    public function __construct(OrderService $orderService)
-    {
-        $this->orderService = $orderService;
-    }
+    public function __construct(private OrderService $orderService) {}
 
     public function handle(PaymentRefundedEvent $event)
     {

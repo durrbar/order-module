@@ -17,7 +17,7 @@ class OrderCreateRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -27,7 +27,7 @@ class OrderCreateRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'coupon_id' => 'nullable|exists:Modules\Ecommerce\Models\Coupon,id',
@@ -52,7 +52,7 @@ class OrderCreateRequest extends FormRequest
         ];
     }
 
-    public function failedValidation(Validator $validator)
+    public function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(response()->json($validator->errors(), 422));
     }

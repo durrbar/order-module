@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
-use Modules\Common\Facades\ErrorHelper;
+use Modules\Core\Facades\ErrorHelper;
 use Modules\Order\Http\Controllers\Traits\HandleOrderOperations;
 use Modules\Order\Http\Requests\OrderRequest;
 use Modules\Order\Models\Order;
